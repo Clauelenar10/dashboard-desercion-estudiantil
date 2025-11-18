@@ -405,3 +405,68 @@ with col1:
             st.metric("Tasa Deserción", f"{tasa:.1f}%")
 
 st.markdown("---")
+# Análisis Académico
+st.subheader("Análisis Académico")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Box plot: Promedio por Deserción
+    fig_promedio = px.box(
+        df,
+        x='desertor',
+        y='promedio',
+        color='desertor',
+        labels={'desertor': 'Desertor', 'promedio': 'Promedio Acumulado'},
+        title='Distribución de Promedio por Estado',
+        color_discrete_map={0: '#00cc96', 1: '#ef553b'}
+    )
+    fig_promedio.update_xaxes(tickvals=[0, 1], ticktext=['No Desertor', 'Desertor'])
+    st.plotly_chart(fig_promedio, use_container_width=True)
+    
+    # Estadísticas
+    st.markdown("##### Promedios")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        promedio_no_desertor = df[df['desertor'] == 0]['promedio'].mean()
+        st.metric("No Desertores", f"{promedio_no_desertor:.2f}")
+    with col_b:
+        promedio_desertor = df[df['desertor'] == 1]['promedio'].mean()
+        st.metric("Desertores", f"{promedio_desertor:.2f}")
+
+with col2:
+    # Scatter: Materias Perdidas vs Promedio
+    fig_scatter = px.scatter(
+        df.sample(min(1000, len(df))),  # Muestra para performance
+        x='promedio',
+        y='materias_perdidas',
+        color='desertor',
+        size='materias_cursadas',
+        hover_data=['programa', 'semestre_actual'],
+        labels={
+            'promedio': 'Promedio Acumulado',
+            'materias_perdidas': 'Materias Perdidas',
+            'desertor': 'Desertor',
+            'materias_cursadas': 'Materias Cursadas'
+        },
+        title='Relación Promedio vs Materias Perdidas',
+        color_discrete_map={0: '#00cc96', 1: '#ef553b'}
+    )
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+# Histograma de materias perdidas
+st.markdown("#### Distribución de Materias Perdidas")
+fig_hist = px.histogram(
+    df,
+    x='materias_perdidas',
+    color='desertor',
+    barmode='overlay',
+    nbins=20,
+    labels={'materias_perdidas': 'Materias Perdidas', 'desertor': 'Desertor'},
+    title='Frecuencia de Materias Perdidas',
+    color_discrete_map={0: '#00cc96', 1: '#ef553b'},
+    opacity=0.7
+)
+st.plotly_chart(fig_hist, use_container_width=True)
+
+st.markdown("---")
