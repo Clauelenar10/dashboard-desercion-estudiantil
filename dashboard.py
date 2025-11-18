@@ -139,7 +139,11 @@ else:
         df_filtrado_periodo['periodo'] = df_filtrado_periodo['periodo'].astype(str)
         
         # Filtrar solo los 3 periodos válidos como strings
-        df_filtrado_periodo = df_filtrado_periodo[df_filtrado_periodo['periodo'].isin(['202410', '202430', '202510'])]
+        # Convertir periodo a string primero
+        df_filtrado['periodo'] = df_filtrado['periodo'].astype(str)
+
+        # Filtrar solo los 3 periodos válidos como strings
+        df_filtrado = df_filtrado[df_filtrado['periodo'].isin(['202410', '202430', '202510'])]
         
         desercion_periodo = df_filtrado_periodo.groupby(['periodo', 'desertor']).size().reset_index(name='count')
         
