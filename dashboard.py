@@ -109,27 +109,29 @@ else:
     col1, col2 = st.columns(2)
     
     with col1:
-    # Pie chart deserción
-    desercion_counts = df_filtrado['desertor'].value_counts()
+        # Pie chart deserción
+        import plotly.express as px
+        
+        desercion_counts = df_filtrado['desertor'].value_counts()
+        
+        if len(desercion_counts) > 0:
+            # Crear diccionario para mapear
+            labels = []
+            values = []
+            for idx, val in desercion_counts.items():
+                labels.append('No Desertor' if idx == 0 else 'Desertor')
+                values.append(val)
+            
+            fig = px.pie(values=values, 
+                         names=labels,
+                         title=f"Deserción - {estrato_seleccionado}",
+                         color_discrete_sequence=['#00cc96', '#ef553b'])
+            st.plotly_chart(fig, use_container_width=True)
+            
+            st.info(f"Total estudiantes: {len(df_filtrado)}")
+        else:
+            st.warning("No hay datos para mostrar") 
     
-    if len(desercion_counts) > 0:
-        # Crear diccionario para mapear
-        labels = []
-        values = []
-        for idx, val in desercion_counts.items():
-            labels.append('No Desertor' if idx == 0 else 'Desertor')
-            values.append(val)
-        
-        fig = px.pie(values=values, 
-                     names=labels,
-                     title=f"Deserción - {estrato_seleccionado}",
-                     color_discrete_sequence=['#00cc96', '#ef553b'])
-        st.plotly_chart(fig, use_container_width=True)
-        
-        st.info(f"Total estudiantes: {len(df_filtrado)}")
-    else:
-        st.warning("No hay datos para mostrar") 
-           
     with col2:
         # Bar chart por periodo
         desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
