@@ -83,7 +83,6 @@ with col4:
 
 st.markdown("---")
 # Distribución de deserción
-# Distribución de deserción
 st.subheader("Distribución de Deserción")
 
 # Filtro por estrato
@@ -103,34 +102,40 @@ else:
 # Filtrar solo los 3 periodos válidos
 df_filtrado = df_filtrado[df_filtrado['periodo'].isin([202410, 202430, 202510])]
 
-col1, col2 = st.columns(2)
-
-with col1:
-    # Pie chart deserción (con datos filtrados)
-    desercion_counts = df_filtrado['desertor'].value_counts()
-    desercion_counts.index = ['No Desertor', 'Desertor']
+# Validar que hay datos después del filtro
+if len(df_filtrado) == 0:
+    st.warning("No hay datos disponibles para esta selección")
+else:
+    col1, col2 = st.columns(2)
     
-    fig = px.pie(values=desercion_counts.values, 
-                 names=desercion_counts.index,
-                 title=f"Deserción - {estrato_seleccionado}",
-                 color_discrete_sequence=['#00cc96', '#ef553b'])
-    st.plotly_chart(fig, use_container_width=True)
+    with col1:
+        # Pie chart deserción
+        desercion_counts = df_filtrado['desertor'].value_counts()
+        
+        if len(desercion_counts) > 0:
+            desercion_counts.index = ['No Desertor' if x == 0 else 'Desertor' for x in desercion_counts.index]
+            
+            fig = px.pie(values=desercion_counts.values, 
+                         names=desercion_counts.index,
+                         title=f"Deserción - {estrato_seleccionado}",
+                         color_discrete_sequence=['#00cc96', '#ef553b'])
+            st.plotly_chart(fig, use_container_width=True)
+            
+            st.info(f"Total estudiantes: {len(df_filtrado)}")
     
-    st.info(f"Total estudiantes en esta selección: {len(df_filtrado)}")
-
-with col2:
-    # Bar chart por periodo (con datos filtrados)
-    desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
-    desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
-    
-    # Convertir periodo a string
-    desercion_periodo['periodo'] = desercion_periodo['periodo'].astype(str)
-    
-    fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
-                  title=f"Deserción por Periodo - {estrato_seleccionado}",
-                  barmode='group',
-                  color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
-                  category_orders={'periodo': ['202410', '202430', '202510']})
-    st.plotly_chart(fig2, use_container_width=True)
+    with col2:
+        # Bar chart por periodo
+        desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
+        
+        if len(desercion_periodo) > 0:
+            desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
+            desercion_periodo['periodo'] = desercion_periodo['periodo'].astype(str)
+            
+            fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
+                          title=f"Deserción por Periodo - {estrato_seleccionado}",
+                          barmode='group',
+                          color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
+                          category_orders={'periodo': ['202410', '202430', '202510']})
+            st.plotly_chart(fig2, use_container_width=True)
 
 st.markdown("---")
