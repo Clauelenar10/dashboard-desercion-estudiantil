@@ -133,18 +133,26 @@ else:
             st.warning("No hay datos para mostrar") 
     
     with col2:
-        # Bar chart por periodo
-        desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
+    # Bar chart por periodo
+    # Convertir periodo a string ANTES del groupby
+        df_filtrado_periodo = df_filtrado.copy()
+        df_filtrado_periodo['periodo'] = df_filtrado_periodo['periodo'].astype(str)
+        
+        # Filtrar solo los 3 periodos válidos como strings
+        df_filtrado_periodo = df_filtrado_periodo[df_filtrado_periodo['periodo'].isin(['202410', '202430', '202510'])]
+        
+        desercion_periodo = df_filtrado_periodo.groupby(['periodo', 'desertor']).size().reset_index(name='count')
         
         if len(desercion_periodo) > 0:
             desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
-            desercion_periodo['periodo'] = desercion_periodo['periodo'].astype(str)
             
             fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
-                          title=f"Deserción por Periodo - {estrato_seleccionado}",
-                          barmode='group',
-                          color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
-                          category_orders={'periodo': ['202410', '202430', '202510']})
+                        title=f"Deserción por Periodo - {estrato_seleccionado}",
+                        barmode='group',
+                        color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
+                        category_orders={'periodo': ['202410', '202430', '202510']})
             st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.warning("No hay datos para este periodo")
 
 st.markdown("---")
