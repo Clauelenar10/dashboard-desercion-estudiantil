@@ -82,82 +82,196 @@ with col4:
     st.metric("🎓 Becados", total_becados)
 
 st.markdown("---")
+
+# Análisis Geográfico
+st.subheader("Análisis Geográfico")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Mapa de Colombia por departamento
+    st.markdown("#### Estudiantes por Departamento (Colombia)")
+    
+    # Filtrar solo estudiantes de Colombia
+    df_colombia = df[df['es_colombia'] == 1].copy()
+    
+    # Contar por departamento
+    estudiantes_depto = df_colombia['departamento'].value_counts().reset_index()
+    estudiantes_depto.columns = ['departamento', 'count']
+    
+    # Calcular deserción por departamento
+    desercion_depto = df_colombia.groupby('departamento')['desertor'].agg(['sum', 'count']).reset_index()
+    desercion_depto['tasa_desercion'] = (desercion_depto['sum'] / desercion_depto['count'] * 100).round(1)
+    desercion_depto.columns = ['departamento', 'desertores', 'total', 'tasa_desercion']
+    
+    # Merge
+    mapa_data = estudiantes_depto.merge(desercion_depto, on='departamento')
+    
+    # Gráfico de barras horizontales (ya que no tenemos coordenadas exactas)
+    fig_mapa = px.bar(mapa_data.sort_values('count', ascending=True).tail(15), 
+                      y='departamento', 
+                      x='count',
+                      orientation='h',
+                      title='Top 15 Departamentos',
+                      labels={'count': 'Estudiantes', 'departamento': 'Departamento'},
+                      color='tasa_desercion',
+                      color_continuous_scale='RdYlGn_r',
+                      hover_data={'tasa_desercion': ':.1f'})
+    
+    fig_mapa.update_layout(height=500)
+    st.plotly_chart(fig_mapa, use_container_width=True)
+    
+    # Mostrar tabla de ciudades principales
+    st.markdown("##### Principales Ciudades")
+    ciudades_top = df_colombia['ciudad'].value_counts().head(10).reset_index()
+    ciudades_top.columns = ['Ciudad', 'Estudiantes']
+    st.dataframe(ciudades_top, hide_index=True, use_container_width=True)
+
+with col2:
+    # Estudiantes internacionales
+    st.markdown("#### Estudiantes Internacionales")
+    
+    # Filtrar estudiantes NO colombianos
+    df_internacional = df[df['es_colombia'] == 0].copy()
+    
+    if len(df_internacional) > 0:
+        # Contar por país
+        paises = df_internacional['pais'].value_counts().reset_index()
+        paises.columns = ['pais', 'count']
+        
+        # Gráfico de barras
+        fig_paises = px.bar(paises, 
+                            x='count', 
+                            y='pais',
+                            orientation='h',
+                            title=f'Estudiantes por País ({len(df_internacional)} total)',
+                            labels={'count': 'Número de Estudiantes', 'pais': 'País'},
+                            color='count',
+                            color_continuous_scale='Blues')
+        
+        fig_paises.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig_paises, use_container_width=True)
+        
+        # Tasa de deserción por país
+        st.markdown("##### Deserción por País")
+        desercion_pais = df_internacional.groupby('pais').agg({
+            'desertor': ['sum', 'count']
+        }).reset_index()
+        desercion_pais.columns = ['pais', 'desertores', 'total']
+        desercion_pais['tasa'] = (desercion_pais['desertores'] / desercion_pais['total'] * 100).round(1)
+        desercion_pais = desercion_pais.sort_values('total', ascending=False)
+        
+        st.dataframe(desercion_pais[['pais', 'total', 'desertores', 'tasa']], 
+                     hide_index=True, 
+                     use_container_width=True,
+                     column_config={
+                         'pais': 'País',
+                         'total': 'Total',
+                         'desertores': 'Desertores',
+                         'tasa': st.column_config.NumberColumn('Tasa %', format="%.1f%%")
+                     })
+    else:
+        st.info("No hay estudiantes internacionales en la base de datos")
+
+st.markdown("---")
+
 # Distribución de deserción
 st.subheader("Distribución de Deserción")
 
-# Filtro por estrato
-estratos_disponibles = sorted(df['estrato'].dropna().unique())
-estratos_seleccionados = st.multiselect(
-    "Filtrar por Estrato:",
-    [f"Estrato {int(e)}" for e in estratos_disponibles],
-    default=[f"Estrato {int(e)}" for e in estratos_disponibles]
-)
+col1, col2 = st.columns([2, 1])
 
-# Filtrar datos según selección
-if len(estratos_seleccionados) == 0:
-    st.warning("Por favor selecciona al menos un estrato")
-    st.stop()
-elif len(estratos_seleccionados) == len(estratos_disponibles):
-    df_filtrado = df.copy()
-    estrato_label = "Todos los Estratos"
-else:
-    estratos_nums = [int(e.split()[-1]) for e in estratos_seleccionados]
-    df_filtrado = df[df['estrato'].isin(estratos_nums)].copy()
-    estrato_label = ", ".join(estratos_seleccionados)
-
-# Filtrar solo los 3 periodos válidos
-df_filtrado = df_filtrado[df_filtrado['periodo'].isin([202410, 202430, 202510])]
-
-# Validar que hay datos después del filtro
-if len(df_filtrado) == 0:
-    st.warning("No hay datos disponibles para esta selección")
-else:
-    col1, col2 = st.columns(2)
+with col2:
+    # Filtros en la derecha
+    st.markdown("### Filtros")
     
-    with col1:
-        # Pie chart deserción
-        import plotly.express as px
-        
+    # Filtro por estrato (múltiple)
+    estratos_disponibles = sorted(df['estrato'].dropna().unique())
+    estratos_seleccionados = st.multiselect(
+        "Estrato:",
+        [int(e) for e in estratos_disponibles],
+        default=[int(e) for e in estratos_disponibles]
+    )
+    
+    st.markdown("---")
+    
+    # Filtro por género (múltiple)
+    generos_seleccionados = st.multiselect(
+        "Género:",
+        ["M", "F"],
+        default=["M", "F"]
+    )
+    
+    st.markdown("---")
+    
+    # Filtro por becado (múltiple)
+    becados_seleccionados = st.multiselect(
+        "Becado:",
+        ["Institucional", "Oficial", "No becado"],
+        default=["Institucional", "Oficial", "No becado"]
+    )
+
+with col1:
+    # Aplicar filtros
+    df_filtrado = df.copy()
+    
+    # Filtrar por estrato
+    if len(estratos_seleccionados) > 0:
+        df_filtrado = df_filtrado[df_filtrado['estrato'].isin(estratos_seleccionados)]
+    
+    # Filtrar por género
+    if len(generos_seleccionados) > 0:
+        df_filtrado = df_filtrado[df_filtrado['genero'].isin(generos_seleccionados)]
+    
+    # Filtrar por becado
+    if len(becados_seleccionados) > 0:
+        df_filtrado = df_filtrado[df_filtrado['becado'].isin(becados_seleccionados)]
+    
+    # Convertir periodo a string y filtrar
+    df_filtrado['periodo'] = df_filtrado['periodo'].astype(str)
+    df_filtrado = df_filtrado[df_filtrado['periodo'].isin(['202410', '202430', '202510'])]
+    
+    # Validar que hay datos
+    if len(df_filtrado) == 0:
+        st.warning("No hay datos para la selección actual")
+    else:
+        # Contar deserción
         desercion_counts = df_filtrado['desertor'].value_counts()
         
-        if len(desercion_counts) > 0:
-            # Crear diccionario para mapear
-            labels = []
-            values = []
-            for idx, val in desercion_counts.items():
-                labels.append('No Desertor' if idx == 0 else 'Desertor')
-                values.append(val)
-            
-            fig = px.pie(values=values, 
-                         names=labels,
-                         title=f"Deserción - {estrato_label}",
-                         color_discrete_sequence=['#00cc96', '#ef553b'])
-            st.plotly_chart(fig, use_container_width=True)
-            
-            st.info(f"Total estudiantes: {len(df_filtrado)}")
-        else:
-            st.warning("No hay datos para mostrar") 
-    
-    with col2:
-    # Bar chart por periodo
-        desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
+        labels = []
+        values = []
+        for idx, val in desercion_counts.items():
+            labels.append('No Desertor' if idx == 0 else 'Desertor')
+            values.append(val)
         
-        if len(desercion_periodo) > 0:
-            desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
-            
-            fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
-                        title=f"Deserción por Periodo - {estrato_label}",
-                        barmode='group',
-                        color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'})
-            
-            # Forzar eje X como categórico
-            fig2.update_xaxes(type='category', categoryorder='array', categoryarray=['202410', '202430', '202510'])
-            
-            # Quitar controles deslizantes
-            fig2.update_layout(xaxis_fixedrange=True, yaxis_fixedrange=True)
-            
-            st.plotly_chart(fig2, use_container_width=True)
-        else:
-            st.warning("No hay datos para este periodo")
+        # Crear gráfica de dona
+        import plotly.graph_objects as go
+        
+        fig = go.Figure(data=[go.Pie(
+            labels=labels,
+            values=values,
+            hole=0.4,
+            marker_colors=['#00cc96', '#ef553b'],
+            texttemplate='%{label}<br>%{value}<br>(%{percent})',
+            textposition='inside'
+        )])
+        
+        fig.update_layout(
+            title="Distribución de Deserción",
+            showlegend=True,
+            height=400
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Métricas debajo de la gráfica
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.metric("Total Filtrado", len(df_filtrado))
+        with col_b:
+            desertores = df_filtrado['desertor'].sum()
+            st.metric("Desertores", desertores)
+        with col_c:
+            tasa = (desertores / len(df_filtrado) * 100) if len(df_filtrado) > 0 else 0
+            st.metric("Tasa Deserción", f"{tasa:.1f}%")
 
 st.markdown("---")
