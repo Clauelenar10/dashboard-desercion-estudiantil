@@ -96,8 +96,8 @@ st.subheader("Análisis Geográfico")
 # Mapa específico de Atlántico por ciudad
 st.markdown("#### Distribución de Estudiantes en Atlántico (por Ciudad)")
 
-# Filtrar solo estudiantes de Atlántico
-df_atlantico = df[(df['es_colombia'] == 1) & (df['departamento'].str.upper().str.strip() == 'ATLANTICO')].copy()
+# Filtrar estudiantes de Atlántico (antes de normalizar)
+df_atlantico = df[df['departamento'].str.upper().str.strip().str.contains('ATLANTICO|ATLÁNTICO', na=False)].copy()
 
 if len(df_atlantico) > 0:
     # Contar por ciudad
