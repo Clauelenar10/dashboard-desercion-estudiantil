@@ -106,10 +106,27 @@ estudiantes_depto = df_colombia.groupby('departamento').agg({
 estudiantes_depto.columns = ['departamento', 'total_estudiantes', 'desertores']
 estudiantes_depto['tasa_desercion'] = (estudiantes_depto['desertores'] / estudiantes_depto['total_estudiantes'] * 100).round(1)
 
-# Normalizar nombres de departamentos
-estudiantes_depto['departamento'] = estudiantes_depto['departamento'].str.upper().str.strip()
+# Mapeo de nombres para hacer match con GeoJSON
+mapeo_departamentos = {
+    'ATLANTICO': 'ATLÁNTICO',
+    'BOLIVAR': 'BOLÍVAR',
+    'BOGOTA': 'BOGOTÁ D.C.',
+    'BOGOTA D.C.': 'BOGOTÁ D.C.',
+    'BOGOTÁ': 'BOGOTÁ D.C.',
+    'CORDOBA': 'CÓRDOBA',
+    'NARINO': 'NARIÑO',
+    'QUINDIO': 'QUINDÍO',
+    'VALLE': 'VALLE DEL CAUCA',
+    'NORTE SANTANDER': 'NORTE DE SANTANDER',
+    'ARCHIPIELAGO DE SAN ANDRES': 'ARCHIPIÉLAGO DE SAN ANDRÉS, PROVIDENCIA Y SANTA CATALINA',
+    'SAN ANDRES': 'ARCHIPIÉLAGO DE SAN ANDRÉS, PROVIDENCIA Y SANTA CATALINA'
+}
 
-# Cargar GeoJSON de Colombia desde URL
+# Normalizar y mapear nombres
+estudiantes_depto['departamento'] = estudiantes_depto['departamento'].str.upper().str.strip()
+estudiantes_depto['departamento'] = estudiantes_depto['departamento'].replace(mapeo_departamentos)
+
+# Cargar GeoJSON de Colombia
 @st.cache_data
 def load_geojson():
     url = "https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/3aadedf47badbdac823b00dbe259f6bc6d9e1899/colombia.geo.json"
@@ -118,16 +135,19 @@ def load_geojson():
 
 geojson_colombia = load_geojson()
 
-# Crear el mapa
+# Crear el mapa con escala logarítmica para mejor contraste
 fig_mapa = px.choropleth_mapbox(
     estudiantes_depto,
     geojson=geojson_colombia,
     locations='departamento',
     featureidkey="properties.NOMBRE_DPT",
     color='total_estudiantes',
-    color_continuous_scale="Blues",
+    color_continuous_scale="Viridis",  # Escala con mejor contraste
+    range_color=[estudiantes_depto['total_estudiantes'].min(), 
+                 estudiantes_depto['total_estudiantes'].max()],
     hover_name='departamento',
     hover_data={
+        'departamento': False,
         'total_estudiantes': True,
         'desertores': True,
         'tasa_desercion': ':.1f'
@@ -135,9 +155,9 @@ fig_mapa = px.choropleth_mapbox(
     mapbox_style="carto-positron",
     zoom=4.5,
     center={"lat": 4.5, "lon": -74},
-    opacity=0.7,
-    labels={'total_estudiantes': 'Total', 
-            'tasa_desercion': 'Tasa %',
+    opacity=0.8,
+    labels={'total_estudiantes': 'Total Estudiantes', 
+            'tasa_desercion': 'Tasa Deserción %',
             'desertores': 'Desertores'}
 )
 
@@ -157,7 +177,7 @@ st.dataframe(
     use_container_width=True,
     column_config={
         'departamento': 'Departamento',
-        'total_estudiantes': 'Total Estudiantes',
+        'total_estudiantes': 'Total',
         'desertores': 'Desertores',
         'tasa_desercion': st.column_config.NumberColumn('Tasa %', format="%.1f%%")
     }
