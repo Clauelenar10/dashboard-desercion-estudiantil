@@ -87,17 +87,23 @@ st.subheader("Distribución de Deserción")
 
 # Filtro por estrato
 estratos_disponibles = sorted(df['estrato'].dropna().unique())
-estrato_seleccionado = st.selectbox(
+estratos_seleccionados = st.multiselect(
     "Filtrar por Estrato:",
-    ["Todos"] + [f"Estrato {int(e)}" for e in estratos_disponibles]
+    [f"Estrato {int(e)}" for e in estratos_disponibles],
+    default=[f"Estrato {int(e)}" for e in estratos_disponibles]
 )
 
 # Filtrar datos según selección
-if estrato_seleccionado == "Todos":
+if len(estratos_seleccionados) == 0:
+    st.warning("Por favor selecciona al menos un estrato")
+    st.stop()
+elif len(estratos_seleccionados) == len(estratos_disponibles):
     df_filtrado = df.copy()
+    estrato_label = "Todos los Estratos"
 else:
-    estrato_num = int(estrato_seleccionado.split()[-1])
-    df_filtrado = df[df['estrato'] == estrato_num].copy()
+    estratos_nums = [int(e.split()[-1]) for e in estratos_seleccionados]
+    df_filtrado = df[df['estrato'].isin(estratos_nums)].copy()
+    estrato_label = ", ".join(estratos_seleccionados)
 
 # Filtrar solo los 3 periodos válidos
 df_filtrado = df_filtrado[df_filtrado['periodo'].isin([202410, 202430, 202510])]
@@ -124,7 +130,7 @@ else:
             
             fig = px.pie(values=values, 
                          names=labels,
-                         title=f"Deserción - {estrato_seleccionado}",
+                         title=f"Deserción - {estrato_label}",
                          color_discrete_sequence=['#00cc96', '#ef553b'])
             st.plotly_chart(fig, use_container_width=True)
             
@@ -134,29 +140,21 @@ else:
     
     with col2:
     # Bar chart por periodo
-    # Convertir periodo a string ANTES del groupby
-        df_filtrado_periodo = df_filtrado.copy()
-        df_filtrado_periodo['periodo'] = df_filtrado_periodo['periodo'].astype(str)
-        
-        # Filtrar solo los 3 periodos válidos como strings
-        # Convertir periodo a string primero
-        df_filtrado['periodo'] = df_filtrado['periodo'].astype(str)
-
-        # Filtrar solo los 3 periodos válidos como strings
-        df_filtrado = df_filtrado[df_filtrado['periodo'].isin(['202410', '202430', '202510'])]
-        
-        desercion_periodo = df_filtrado_periodo.groupby(['periodo', 'desertor']).size().reset_index(name='count')
+        desercion_periodo = df_filtrado.groupby(['periodo', 'desertor']).size().reset_index(name='count')
         
         if len(desercion_periodo) > 0:
             desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
             
             fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
-                        title=f"Deserción por Periodo - {estrato_seleccionado}",
+                        title=f"Deserción por Periodo - {estrato_label}",
                         barmode='group',
                         color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'})
             
             # Forzar eje X como categórico
             fig2.update_xaxes(type='category', categoryorder='array', categoryarray=['202410', '202430', '202510'])
+            
+            # Quitar controles deslizantes
+            fig2.update_layout(xaxis_fixedrange=True, yaxis_fixedrange=True)
             
             st.plotly_chart(fig2, use_container_width=True)
         else:
