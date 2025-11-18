@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
 st.set_page_config(page_title="Dashboard Deserción")
 
 # Título
@@ -92,92 +93,75 @@ st.markdown("---")
 # Análisis Geográfico
 st.subheader("Análisis Geográfico")
 
-col1, col2 = st.columns(2)
+# Mapa de Colombia por departamento
+st.markdown("#### Distribución de Estudiantes en Colombia")
 
-with col1:
-    # Mapa de Colombia por departamento
-    st.markdown("#### Estudiantes por Departamento (Colombia)")
-    
-    # Filtrar solo estudiantes de Colombia
-    df_colombia = df[df['es_colombia'] == 1].copy()
-    
-    # Contar por departamento
-    estudiantes_depto = df_colombia['departamento'].value_counts().reset_index()
-    estudiantes_depto.columns = ['departamento', 'count']
-    
-    # Calcular deserción por departamento
-    desercion_depto = df_colombia.groupby('departamento')['desertor'].agg(['sum', 'count']).reset_index()
-    desercion_depto['tasa_desercion'] = (desercion_depto['sum'] / desercion_depto['count'] * 100).round(1)
-    desercion_depto.columns = ['departamento', 'desertores', 'total', 'tasa_desercion']
-    
-    # Merge
-    mapa_data = estudiantes_depto.merge(desercion_depto, on='departamento')
-    
-    # Gráfico de barras horizontales (ya que no tenemos coordenadas exactas)
-    fig_mapa = px.bar(mapa_data.sort_values('count', ascending=True).tail(15), 
-                      y='departamento', 
-                      x='count',
-                      orientation='h',
-                      title='Top 15 Departamentos',
-                      labels={'count': 'Estudiantes', 'departamento': 'Departamento'},
-                      color='tasa_desercion',
-                      color_continuous_scale='RdYlGn_r',
-                      hover_data={'tasa_desercion': ':.1f'})
-    
-    fig_mapa.update_layout(height=500)
-    st.plotly_chart(fig_mapa, use_container_width=True)
-    
-    # Mostrar tabla de ciudades principales
-    st.markdown("##### Principales Ciudades")
-    ciudades_top = df_colombia['ciudad'].value_counts().head(10).reset_index()
-    ciudades_top.columns = ['Ciudad', 'Estudiantes']
-    st.dataframe(ciudades_top, hide_index=True, use_container_width=True)
+# Filtrar solo estudiantes de Colombia
+df_colombia = df[df['es_colombia'] == 1].copy()
 
-with col2:
-    # Estudiantes internacionales
-    st.markdown("#### Estudiantes Internacionales")
-    
-    # Filtrar estudiantes NO colombianos
-    df_internacional = df[df['es_colombia'] == 0].copy()
-    
-    if len(df_internacional) > 0:
-        # Contar por país
-        paises = df_internacional['pais'].value_counts().reset_index()
-        paises.columns = ['pais', 'count']
-        
-        # Gráfico de barras
-        fig_paises = px.bar(paises, 
-                            x='count', 
-                            y='pais',
-                            orientation='h',
-                            title=f'Estudiantes por País ({len(df_internacional)} total)',
-                            labels={'count': 'Número de Estudiantes', 'pais': 'País'},
-                            color='count',
-                            color_continuous_scale='Blues')
-        
-        fig_paises.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_paises, use_container_width=True)
-        
-        # Tasa de deserción por país
-        st.markdown("##### Deserción por País")
-        desercion_pais = df_internacional.groupby('pais').agg({
-            'desertor': ['sum', 'count']
-        }).reset_index()
-        desercion_pais.columns = ['pais', 'desertores', 'total']
-        desercion_pais['tasa'] = (desercion_pais['desertores'] / desercion_pais['total'] * 100).round(1)
-        desercion_pais = desercion_pais.sort_values('total', ascending=False)
-        
-        st.dataframe(desercion_pais[['pais', 'total', 'desertores', 'tasa']], 
-                     hide_index=True, 
-                     use_container_width=True,
-                     column_config={
-                         'pais': 'País',
-                         'total': 'Total',
-                         'desertores': 'Desertores',
-                         'tasa': st.column_config.NumberColumn('Tasa %', format="%.1f%%")
-                     })
-    else:
-        st.info("No hay estudiantes internacionales en la base de datos")
+# Contar por departamento
+estudiantes_depto = df_colombia.groupby('departamento').agg({
+    'desertor': ['count', 'sum']
+}).reset_index()
+estudiantes_depto.columns = ['departamento', 'total_estudiantes', 'desertores']
+estudiantes_depto['tasa_desercion'] = (estudiantes_depto['desertores'] / estudiantes_depto['total_estudiantes'] * 100).round(1)
+
+# Normalizar nombres de departamentos
+estudiantes_depto['departamento'] = estudiantes_depto['departamento'].str.upper().str.strip()
+
+# Cargar GeoJSON de Colombia desde URL
+@st.cache_data
+def load_geojson():
+    url = "https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/3aadedf47badbdac823b00dbe259f6bc6d9e1899/colombia.geo.json"
+    response = requests.get(url)
+    return response.json()
+
+geojson_colombia = load_geojson()
+
+# Crear el mapa
+fig_mapa = px.choropleth_mapbox(
+    estudiantes_depto,
+    geojson=geojson_colombia,
+    locations='departamento',
+    featureidkey="properties.NOMBRE_DPT",
+    color='total_estudiantes',
+    color_continuous_scale="Blues",
+    hover_name='departamento',
+    hover_data={
+        'total_estudiantes': True,
+        'desertores': True,
+        'tasa_desercion': ':.1f'
+    },
+    mapbox_style="carto-positron",
+    zoom=4.5,
+    center={"lat": 4.5, "lon": -74},
+    opacity=0.7,
+    labels={'total_estudiantes': 'Total', 
+            'tasa_desercion': 'Tasa %',
+            'desertores': 'Desertores'}
+)
+
+fig_mapa.update_layout(
+    height=600,
+    margin={"r": 0, "t": 0, "l": 0, "b": 0}
+)
+
+st.plotly_chart(fig_mapa, use_container_width=True)
+
+# Tabla resumen
+st.markdown("#### Top 10 Departamentos")
+top_deptos = estudiantes_depto.sort_values('total_estudiantes', ascending=False).head(10)
+st.dataframe(
+    top_deptos[['departamento', 'total_estudiantes', 'desertores', 'tasa_desercion']],
+    hide_index=True,
+    use_container_width=True,
+    column_config={
+        'departamento': 'Departamento',
+        'total_estudiantes': 'Total Estudiantes',
+        'desertores': 'Desertores',
+        'tasa_desercion': st.column_config.NumberColumn('Tasa %', format="%.1f%%")
+    }
+)
 
 st.markdown("---")
 
