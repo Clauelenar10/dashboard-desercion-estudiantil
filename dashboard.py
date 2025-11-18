@@ -105,6 +105,7 @@ if len(df_atlantico) > 0:
         'desertor': ['count', 'sum']
     }).reset_index()
     estudiantes_ciudad.columns = ['ciudad', 'total_estudiantes', 'desertores']
+    estudiantes_ciudad['tamaño'] = estudiantes_ciudad['total_estudiantes']*10
     estudiantes_ciudad['tasa_desercion'] = (estudiantes_ciudad['desertores'] / estudiantes_ciudad['total_estudiantes'] * 100).round(1)
     
     # Normalizar nombres de ciudades
@@ -138,7 +139,7 @@ if len(df_atlantico) > 0:
         estudiantes_ciudad_map,
         lat='lat',
         lon='lon',
-        size='total_estudiantes',
+        size='tamaño',
         color='tasa_desercion',
         hover_name='ciudad',
         hover_data={
