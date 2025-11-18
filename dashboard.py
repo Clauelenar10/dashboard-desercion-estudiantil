@@ -153,8 +153,11 @@ else:
             fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
                         title=f"Deserción por Periodo - {estrato_seleccionado}",
                         barmode='group',
-                        color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
-                        category_orders={'periodo': ['202410', '202430', '202510']})
+                        color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'})
+            
+            # Forzar eje X como categórico
+            fig2.update_xaxes(type='category', categoryorder='array', categoryarray=['202410', '202430', '202510'])
+            
             st.plotly_chart(fig2, use_container_width=True)
         else:
             st.warning("No hay datos para este periodo")
