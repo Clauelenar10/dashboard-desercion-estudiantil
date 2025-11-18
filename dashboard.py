@@ -106,7 +106,7 @@ estudiantes_depto = df_colombia.groupby('departamento').agg({
 estudiantes_depto.columns = ['departamento', 'total_estudiantes', 'desertores']
 estudiantes_depto['tasa_desercion'] = (estudiantes_depto['desertores'] / estudiantes_depto['total_estudiantes'] * 100).round(1)
 
-# Mapeo de nombres para hacer match con GeoJSON
+# Mapeo de nombres
 mapeo_departamentos = {
     'ATLANTICO': 'ATLÁNTICO',
     'BOLIVAR': 'BOLÍVAR',
@@ -122,11 +122,13 @@ mapeo_departamentos = {
     'SAN ANDRES': 'ARCHIPIÉLAGO DE SAN ANDRÉS, PROVIDENCIA Y SANTA CATALINA'
 }
 
-# Normalizar y mapear nombres
 estudiantes_depto['departamento'] = estudiantes_depto['departamento'].str.upper().str.strip()
 estudiantes_depto['departamento'] = estudiantes_depto['departamento'].replace(mapeo_departamentos)
 
-# Cargar GeoJSON de Colombia
+# Separar Atlántico para el mapa (sin Atlántico para mejor escala)
+estudiantes_mapa = estudiantes_depto[estudiantes_depto['departamento'] != 'ATLÁNTICO'].copy()
+
+# Cargar GeoJSON
 @st.cache_data
 def load_geojson():
     url = "https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/3aadedf47badbdac823b00dbe259f6bc6d9e1899/colombia.geo.json"
@@ -135,16 +137,14 @@ def load_geojson():
 
 geojson_colombia = load_geojson()
 
-# Crear el mapa con escala logarítmica para mejor contraste
+# Crear el mapa SIN Atlántico
 fig_mapa = px.choropleth_mapbox(
-    estudiantes_depto,
+    estudiantes_mapa,
     geojson=geojson_colombia,
     locations='departamento',
     featureidkey="properties.NOMBRE_DPT",
     color='total_estudiantes',
-    color_continuous_scale="Viridis",  # Escala con mejor contraste
-    range_color=[estudiantes_depto['total_estudiantes'].min(), 
-                 estudiantes_depto['total_estudiantes'].max()],
+    color_continuous_scale="Viridis",
     hover_name='departamento',
     hover_data={
         'departamento': False,
@@ -168,8 +168,10 @@ fig_mapa.update_layout(
 
 st.plotly_chart(fig_mapa, use_container_width=True)
 
-# Tabla resumen
-st.markdown("#### Top 10 Departamentos")
+st.info("Nota: Atlántico fue excluido del mapa para mejor visualización de otros departamentos. Ver tabla completa abajo.")
+
+# Tabla resumen CON Atlántico
+st.markdown("#### Top 10 Departamentos (Incluye Atlántico)")
 top_deptos = estudiantes_depto.sort_values('total_estudiantes', ascending=False).head(10)
 st.dataframe(
     top_deptos[['departamento', 'total_estudiantes', 'desertores', 'tasa_desercion']],
