@@ -1,0 +1,5 @@
+streamlit
+pymongo
+plotly
+pandas
+dnspython
