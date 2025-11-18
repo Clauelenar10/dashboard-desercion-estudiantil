@@ -62,20 +62,20 @@ df = pd.DataFrame(registros)
 total_estudiantes = collection.count_documents({})
 
 # KPIs principales
-st.subheader("📊 Métricas Generales")
+st.subheader(" Métricas Generales")
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("📚 Total Estudiantes", len(df))
+    st.metric(" Total Estudiantes", len(df))
 
 with col2:
     tasa_desercion = (df['desertor'].sum() / len(df)) * 100
-    st.metric("⚠️ Tasa Deserción", f"{tasa_desercion:.1f}%")
+    st.metric(" Tasa Deserción", f"{tasa_desercion:.1f}%")
 
 with col3:
     promedio_general = df['promedio'].mean()
-    st.metric("📝 Promedio General", f"{promedio_general:.2f}")
+    st.metric(" Promedio General", f"{promedio_general:.2f}")
 
 with col4:
     total_becados = df['becado'].value_counts().get('Institucional', 0) + df['becado'].value_counts().get('Oficial', 0)
@@ -83,32 +83,54 @@ with col4:
 
 st.markdown("---")
 # Distribución de deserción
-st.subheader("📉 Distribución de Deserción")
+# Distribución de deserción
+st.subheader(" Distribución de Deserción")
+
+# Filtro por estrato
+estratos_disponibles = sorted(df['estrato'].dropna().unique())
+estrato_seleccionado = st.selectbox(
+    " Filtrar por Estrato:",
+    ["Todos"] + [f"Estrato {int(e)}" for e in estratos_disponibles]
+)
+
+# Filtrar datos según selección
+if estrato_seleccionado == "Todos":
+    df_filtrado = df
+else:
+    estrato_num = int(estrato_seleccionado.split()[-1])
+    df_filtrado = df[df['estrato'] == estrato_num]
 
 col1, col2 = st.columns(2)
 
 with col1:
-    # Pie chart deserción
+    # Pie chart deserción (con datos filtrados)
     import plotly.express as px
     
-    desercion_counts = df['desertor'].value_counts()
+    desercion_counts = df_filtrado['desertor'].value_counts()
     desercion_counts.index = ['No Desertor', 'Desertor']
     
     fig = px.pie(values=desercion_counts.values, 
                  names=desercion_counts.index,
-                 title="Deserción vs No Deserción",
+                 title=f"Deserción - {estrato_seleccionado}",
                  color_discrete_sequence=['#00cc96', '#ef553b'])
     st.plotly_chart(fig, use_container_width=True)
+    
+    # Mostrar cantidad
+    st.info(f" Total estudiantes en esta selección: {len(df_filtrado)}")
 
 with col2:
     # Bar chart por periodo
+
     desercion_periodo = df.groupby(['periodo', 'desertor']).size().reset_index(name='count')
     desercion_periodo['desertor'] = desercion_periodo['desertor'].map({0: 'No Desertor', 1: 'Desertor'})
-    
-    fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
-                  title="Deserción por Periodo",
-                  barmode='group',
-                  color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'})
-    st.plotly_chart(fig2, use_container_width=True)
 
+    # Convertir periodo a string para que se vea bien
+    desercion_periodo['periodo'] = desercion_periodo['periodo'].astype(str)
+
+    fig2 = px.bar(desercion_periodo, x='periodo', y='count', color='desertor',
+                title="Deserción por Periodo",
+                barmode='group',
+                color_discrete_map={'No Desertor': '#00cc96', 'Desertor': '#ef553b'},
+                category_orders={'periodo': ['202410', '202430', '202510']})
+    st.plotly_chart(fig2, use_container_width=True)
 st.markdown("---")
