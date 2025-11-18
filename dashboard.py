@@ -105,7 +105,16 @@ if len(df_atlantico) > 0:
         'desertor': ['count', 'sum']
     }).reset_index()
     estudiantes_ciudad.columns = ['ciudad', 'total_estudiantes', 'desertores']
-    estudiantes_ciudad['tamaño'] = estudiantes_ciudad['total_estudiantes']*10
+    
+    # Estandarizar usando z-score (distribución normal)
+    mean = estudiantes_ciudad['total_estudiantes'].mean()
+    std = estudiantes_ciudad['total_estudiantes'].std()
+    estudiantes_ciudad['tamaño_std'] = (estudiantes_ciudad['total_estudiantes'] - mean) / std
+    # Escalar a rango positivo (0-100) para el mapa
+    min_std = estudiantes_ciudad['tamaño_std'].min()
+    max_std = estudiantes_ciudad['tamaño_std'].max()
+    estudiantes_ciudad['tamaño'] = ((estudiantes_ciudad['tamaño_std'] - min_std) / (max_std - min_std) * 100).round(0)
+    
     estudiantes_ciudad['tasa_desercion'] = (estudiantes_ciudad['desertores'] / estudiantes_ciudad['total_estudiantes'] * 100).round(1)
     
     # Normalizar nombres de ciudades
@@ -124,9 +133,13 @@ if len(df_atlantico) > 0:
         'Palmar De Varela': {'lat': 10.7403, 'lon': -74.7542},
         'Sabanagrande': {'lat': 10.7889, 'lon': -74.7617},
         'Juan De Acosta': {'lat': 10.8308, 'lon': -75.0408},
-        'Polonuevo': {'lat': 10.7739, 'lon': -74.8528}
-    }
-    
+        'Polonuevo': {'lat': 10.7739, 'lon': -74.8528},
+        'Usiacurí': {'lat': 10.7372, 'lon': -74.9839},
+        'Tubará': {'lat': 10.8833, 'lon': -74.9833},
+        'Piojó': {'lat': 10.7622, 'lon': -75.1097},
+        'Luruaco': {'lat': 10.6167, 'lon': -75.1500},
+        'Repelón': {'lat': 10.4969, 'lon': -75.1333}
+}
     # Agregar coordenadas
     estudiantes_ciudad['lat'] = estudiantes_ciudad['ciudad'].map(lambda x: coordenadas_atlantico.get(x, {}).get('lat'))
     estudiantes_ciudad['lon'] = estudiantes_ciudad['ciudad'].map(lambda x: coordenadas_atlantico.get(x, {}).get('lon'))
