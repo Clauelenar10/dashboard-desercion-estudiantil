@@ -93,6 +93,110 @@ st.markdown("---")
 # Análisis Geográfico
 st.subheader("Análisis Geográfico")
 
+# Mapa específico de Atlántico por ciudad
+st.markdown("#### Distribución de Estudiantes en Atlántico (por Ciudad)")
+
+# Filtrar solo estudiantes de Atlántico
+df_atlantico = df[(df['es_colombia'] == 1) & (df['departamento'].str.upper().str.strip() == 'ATLANTICO')].copy()
+
+if len(df_atlantico) > 0:
+    # Contar por ciudad
+    estudiantes_ciudad = df_atlantico.groupby('ciudad').agg({
+        'desertor': ['count', 'sum']
+    }).reset_index()
+    estudiantes_ciudad.columns = ['ciudad', 'total_estudiantes', 'desertores']
+    estudiantes_ciudad['tasa_desercion'] = (estudiantes_ciudad['desertores'] / estudiantes_ciudad['total_estudiantes'] * 100).round(1)
+    
+    # Normalizar nombres de ciudades
+    estudiantes_ciudad['ciudad'] = estudiantes_ciudad['ciudad'].str.title().str.strip()
+    
+    # Coordenadas aproximadas de ciudades principales de Atlántico
+    coordenadas_atlantico = {
+        'Barranquilla': {'lat': 10.9639, 'lon': -74.7964},
+        'Soledad': {'lat': 10.9185, 'lon': -74.7694},
+        'Malambo': {'lat': 10.8594, 'lon': -74.7739},
+        'Sabanalarga': {'lat': 10.6314, 'lon': -74.9222},
+        'Puerto Colombia': {'lat': 10.9878, 'lon': -74.9547},
+        'Galapa': {'lat': 10.8967, 'lon': -74.8831},
+        'Baranoa': {'lat': 10.7942, 'lon': -74.9164},
+        'Santo Tomás': {'lat': 10.7503, 'lon': -74.7528},
+        'Palmar De Varela': {'lat': 10.7403, 'lon': -74.7542},
+        'Sabanagrande': {'lat': 10.7889, 'lon': -74.7617},
+        'Juan De Acosta': {'lat': 10.8308, 'lon': -75.0408},
+        'Polonuevo': {'lat': 10.7739, 'lon': -74.8528}
+    }
+    
+    # Agregar coordenadas
+    estudiantes_ciudad['lat'] = estudiantes_ciudad['ciudad'].map(lambda x: coordenadas_atlantico.get(x, {}).get('lat'))
+    estudiantes_ciudad['lon'] = estudiantes_ciudad['ciudad'].map(lambda x: coordenadas_atlantico.get(x, {}).get('lon'))
+    
+    # Filtrar solo ciudades con coordenadas
+    estudiantes_ciudad_map = estudiantes_ciudad[estudiantes_ciudad['lat'].notna()].copy()
+    
+    # Crear mapa de dispersión
+    fig_atlantico = px.scatter_mapbox(
+        estudiantes_ciudad_map,
+        lat='lat',
+        lon='lon',
+        size='total_estudiantes',
+        color='tasa_desercion',
+        hover_name='ciudad',
+        hover_data={
+            'lat': False,
+            'lon': False,
+            'total_estudiantes': True,
+            'desertores': True,
+            'tasa_desercion': ':.1f'
+        },
+        color_continuous_scale='RdYlGn_r',
+        size_max=40,
+        zoom=8.5,
+        center={'lat': 10.9, 'lon': -74.8},
+        mapbox_style='carto-positron',
+        labels={
+            'total_estudiantes': 'Total',
+            'desertores': 'Desertores',
+            'tasa_desercion': 'Tasa %'
+        }
+    )
+    
+    fig_atlantico.update_layout(
+        height=500,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0}
+    )
+    
+    st.plotly_chart(fig_atlantico, use_container_width=True)
+    
+    # Tabla de ciudades
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("##### Top 10 Ciudades")
+        top_ciudades = estudiantes_ciudad.sort_values('total_estudiantes', ascending=False).head(10)
+        st.dataframe(
+            top_ciudades[['ciudad', 'total_estudiantes', 'desertores', 'tasa_desercion']],
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                'ciudad': 'Ciudad',
+                'total_estudiantes': 'Total',
+                'desertores': 'Desertores',
+                'tasa_desercion': st.column_config.NumberColumn('Tasa %', format="%.1f%%")
+            }
+        )
+    
+    with col2:
+        st.markdown("##### Estadísticas Atlántico")
+        st.metric("Total Estudiantes", len(df_atlantico))
+        st.metric("Ciudades Representadas", len(estudiantes_ciudad))
+        st.metric("Tasa Deserción Promedio", f"{df_atlantico['desertor'].mean() * 100:.1f}%")
+else:
+    st.warning("No hay datos de estudiantes en Atlántico")
+
+st.markdown("---")
+
+
+
 # Mapa de Colombia por departamento
 st.markdown("#### Distribución de Estudiantes en Colombia")
 
