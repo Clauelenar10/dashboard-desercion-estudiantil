@@ -9,7 +9,7 @@ import numpy as np
 st.set_page_config(page_title="Dashboard Deserción", layout="wide")
 
 # Título principal
-st.title("📊 Dashboard de Deserción Estudiantil")
+st.title("Dashboard de Deserción Estudiantil")
 st.markdown("### Periodo: 2025-10")
 st.markdown("---")
 
@@ -90,25 +90,25 @@ df = pd.DataFrame(registros)
 # ============================================================================
 # SECCIÓN 1: POBLACIÓN GENERAL
 # ============================================================================
-st.header("👥 Población")
+st.header("Población")
 
 # Métricas principales de población
 col1, col2, col3 = st.columns(3)
 
 with col1:
     total_estudiantes = len(df)
-    st.metric("📚 Total Estudiantes", f"{total_estudiantes:,}")
+    st.metric("Total Estudiantes", f"{total_estudiantes:,}")
 
 with col2:
     total_graduados = df['graduado'].sum()
-    st.metric("🎓 Graduados", f"{int(total_graduados):,}")
+    st.metric("Graduados", f"{int(total_graduados):,}")
 
 with col3:
     # Total becados (institucional + oficial)
     becados_institucional = (df['becado'] == 'Institucional').sum()
     becados_oficial = (df['becado'] == 'oficial').sum()
     total_becados = becados_institucional + becados_oficial
-    st.metric("💰 Total Becados", f"{total_becados:,}")
+    st.metric("Total Becados", f"{total_becados:,}")
 
 # Desglose de becados
 col1, col2, col3, col4 = st.columns(4)
@@ -121,11 +121,11 @@ with col2:
 
 with col3:
     estrato_promedio = df['estrato'].mean()
-    st.metric("📊 Estrato Promedio", f"{estrato_promedio:.2f}")
+    st.metric("Estrato Promedio", f"{estrato_promedio:.2f}")
 
 with col4:
     edad_promedio = df['edad'].mean()
-    st.metric("👤 Edad Promedio", f"{edad_promedio:.1f} años")
+    st.metric("Edad Promedio", f"{edad_promedio:.1f} años")
 
 st.markdown("---")
 
@@ -135,25 +135,25 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     estudiantes_barranquilla = (df['es_barranquilla'] == 1).sum()
     pct_barranquilla = (estudiantes_barranquilla / total_estudiantes * 100)
-    st.metric("🏙️ Barranquilla", f"{estudiantes_barranquilla:,}", 
+    st.metric("Barranquilla", f"{estudiantes_barranquilla:,}", 
               delta=f"{pct_barranquilla:.1f}%")
 
 with col2:
     estudiantes_no_barranquilla = (df['es_barranquilla'] == 0).sum()
     pct_no_barranquilla = (estudiantes_no_barranquilla / total_estudiantes * 100)
-    st.metric("🌆 Otras Ciudades", f"{estudiantes_no_barranquilla:,}", 
+    st.metric("Otras Ciudades", f"{estudiantes_no_barranquilla:,}", 
               delta=f"{pct_no_barranquilla:.1f}%")
 
 with col3:
     estudiantes_colombia = (df['es_colombia'] == 1).sum()
     pct_colombia = (estudiantes_colombia / total_estudiantes * 100)
-    st.metric("🇨🇴 Colombia", f"{estudiantes_colombia:,}", 
+    st.metric("Colombia", f"{estudiantes_colombia:,}", 
               delta=f"{pct_colombia:.1f}%")
 
 with col4:
     estudiantes_extranjero = (df['es_colombia'] == 0).sum()
     pct_extranjero = (estudiantes_extranjero / total_estudiantes * 100)
-    st.metric("🌍 Extranjero", f"{estudiantes_extranjero:,}", 
+    st.metric("Extranjero", f"{estudiantes_extranjero:,}", 
               delta=f"{pct_extranjero:.1f}%")
 
 st.markdown("---")
@@ -161,7 +161,7 @@ st.markdown("---")
 # ============================================================================
 # SECCIÓN 2: DISTRIBUCIÓN GEOGRÁFICA
 # ============================================================================
-st.header("🗺️ Distribución Geográfica")
+st.header("Distribución Geográfica")
 
 # Mapa de Colombia por departamento (sin Atlántico)
 st.subheader("Estudiantes por Departamento")
@@ -238,7 +238,7 @@ fig_mapa.update_layout(
 
 st.plotly_chart(fig_mapa, use_container_width=True)
 
-st.info("ℹ️ Nota: Atlántico fue excluido del mapa para mejor visualización de otros departamentos.")
+st.info("Nota: Atlántico fue excluido del mapa para mejor visualización de otros departamentos.")
 
 st.markdown("---")
 
@@ -295,7 +295,7 @@ st.markdown("---")
 # ============================================================================
 # SECCIÓN 3: ANÁLISIS DE DESERCIÓN (SIN GRADUADOS)
 # ============================================================================
-st.header("📉 Análisis de Deserción")
+st.header("Análisis de Deserción")
 
 # Filtrar estudiantes sin graduados
 df_sin_graduados = df[df['graduado'] == 0].copy()
@@ -324,27 +324,27 @@ with col1:
     df_no_becados = df_sin_graduados[df_sin_graduados['becado'] == 'No becado']
     if len(df_no_becados) > 0:
         tasa_no_becados = (df_no_becados['desertor'].sum() / len(df_no_becados) * 100)
-        st.metric("❌ No Becados", f"{tasa_no_becados:.2f}%", 
+        st.metric("No Becados", f"{tasa_no_becados:.2f}%", 
                   delta=f"{len(df_no_becados):,} estudiantes")
     else:
-        st.metric("❌ No Becados", "N/A")
+        st.metric("No Becados", "N/A")
 
 with col2:
     # Becados institucional
     df_bec_inst = df_sin_graduados[df_sin_graduados['becado'] == 'Institucional']
     if len(df_bec_inst) > 0:
         tasa_bec_inst = (df_bec_inst['desertor'].sum() / len(df_bec_inst) * 100)
-        st.metric("🏛️ Becados Institucional", f"{tasa_bec_inst:.2f}%", 
+        st.metric("Becados Institucional", f"{tasa_bec_inst:.2f}%", 
                   delta=f"{len(df_bec_inst):,} estudiantes")
     else:
-        st.metric("🏛️ Becados Institucional", "N/A")
+        st.metric("Becados Institucional", "N/A")
 
 with col3:
     # Becados oficial
-    df_bec_ofi = df_sin_graduados[df_sin_graduados['becado'] == 'Oficial']
+    df_bec_ofi = df_sin_graduados[df_sin_graduados['becado'] == 'oficial']
     if len(df_bec_ofi) > 0:
         tasa_bec_ofi = (df_bec_ofi['desertor'].sum() / len(df_bec_ofi) * 100)
-        st.metric("🏛️ Becados Oficial", f"{tasa_bec_ofi:.2f}%", 
+        st.metric("Becados Oficial", f"{tasa_bec_ofi:.2f}%", 
                   delta=f"{len(df_bec_ofi):,} estudiantes")
     else:
         st.metric("🏛️ Becados Oficial", "N/A")
@@ -501,10 +501,10 @@ with col2:
 col1, col2 = st.columns(2)
 with col1:
     promedio_no_desertor = df_no_desertores['promedio'].mean()
-    st.metric("📊 Promedio No Desertores", f"{promedio_no_desertor:.2f}")
+    st.metric("Promedio No Desertores", f"{promedio_no_desertor:.2f}")
 with col2:
     promedio_desertor = df_desertores['promedio'].mean()
-    st.metric("📊 Promedio Desertores", f"{promedio_desertor:.2f}")
+    st.metric("Promedio Desertores", f"{promedio_desertor:.2f}")
 
 st.markdown("---")
 
@@ -621,14 +621,14 @@ tasa_desercion_segundo = (desertores_con_segundo / len(df_con_segundo) * 100) if
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("👥 Estudiantes con 2° Programa", f"{tiene_segundo:,}", 
+    st.metric("Estudiantes con 2° Programa", f"{tiene_segundo:,}", 
               delta=f"{pct_segundo:.2f}%")
 
 with col2:
-    st.metric("📉 Desertores con 2° Programa", f"{desertores_con_segundo:,}")
+    st.metric("Desertores con 2° Programa", f"{desertores_con_segundo:,}")
 
 with col3:
-    st.metric("📊 Tasa de Deserción", f"{tasa_desercion_segundo:.2f}%")
+    st.metric("Tasa de Deserción", f"{tasa_desercion_segundo:.2f}%")
 
 st.markdown("---")
 
@@ -693,5 +693,5 @@ st.markdown("---")
 
 # Footer
 st.markdown("---")
-st.markdown("### 📊 Dashboard de Análisis Descriptivo de Deserción Estudiantil")
+st.markdown("### Dashboard de Análisis Descriptivo de Deserción Estudiantil")
 st.markdown("**Periodo:** 2025-10")
