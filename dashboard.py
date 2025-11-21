@@ -135,7 +135,7 @@ if "1. Características Generales" in seccion:
     st.markdown("---")
 
     # Métricas principales de población
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         total_estudiantes = len(df)
@@ -146,28 +146,30 @@ if "1. Características Generales" in seccion:
         st.metric("Graduados", f"{int(total_graduados):,}")
 
     with col3:
-        # Total becados (institucional + oficial)
-        becados_institucional = (df['becado'] == 'Institucional').sum()
-        becados_oficial = (df['becado'] == 'oficial').sum()
-        total_becados = becados_institucional + becados_oficial
-        st.metric("Total Becados", f"{total_becados:,}")
-
-    # Desglose de becados
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric("   Becados Institucional", f"{becados_institucional:,}")
-
-    with col2:
-        st.metric("   Becados Oficial", f"{becados_oficial:,}")
-
-    with col3:
         estrato_promedio = df['estrato'].mean()
         st.metric("Estrato Promedio", f"{estrato_promedio:.2f}")
 
     with col4:
         edad_promedio = df['edad'].mean()
         st.metric("Edad Promedio", f"{edad_promedio:.1f} años")
+
+    # Becados
+    st.subheader("Becados")
+    col1, col2, col3 = st.columns(3)
+    
+    # Calcular totales de becados
+    becados_institucional = (df['becado'] == 'Institucional').sum()
+    becados_oficial = (df['becado'] == 'oficial').sum()
+    total_becados = becados_institucional + becados_oficial
+
+    with col1:
+        st.metric("Total Becados", f"{total_becados:,}")
+
+    with col2:
+        st.metric("Becados Institucional", f"{becados_institucional:,}")
+
+    with col3:
+        st.metric("Becados Oficial", f"{becados_oficial:,}")
 
     st.markdown("---")
 
