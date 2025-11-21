@@ -15,8 +15,8 @@ st.set_page_config(
 # ============================================================================
 # SIDEBAR - NAVEGACIÓN
 # ============================================================================
-st.sidebar.image("https://via.placeholder.com/200x80/1f77b4/ffffff?text=Universidad", use_container_width=True)
-st.sidebar.title(" Dashboard Deserción")
+st.sidebar.image("https://via.placeholder.com/200x80/1f77b4/ffffff?text=Estudiante", use_container_width=True)
+st.sidebar.title("Dashboard Deserción")
 st.sidebar.markdown("### Periodo: 2025-10")
 st.sidebar.markdown("---")
 
@@ -130,7 +130,7 @@ mapeo_departamentos = {
 # SECCIÓN 1: CARACTERÍSTICAS GENERALES DE LA POBLACIÓN
 # ============================================================================
 if "1. Características Generales" in seccion:
-    st.title("📊 Características Generales de la Población")
+    st.title("Características Generales de la Población")
     st.markdown("### Análisis descriptivo de toda la población estudiantil")
     st.markdown("---")
 
@@ -321,7 +321,7 @@ if "1. Características Generales" in seccion:
 # SECCIÓN 2: DESERTORES VS NO DESERTORES
 # ============================================================================
 elif "2. Desertores vs No Desertores" in seccion:
-    st.title("⚖️ Análisis Comparativo: Desertores vs No Desertores")
+    st.title("Análisis Comparativo: Desertores vs No Desertores")
     st.markdown("### Comparación detallada entre estudiantes desertores y no desertores")
     st.markdown("---")
 
@@ -375,7 +375,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.metric("Becados Oficial", f"{tasa_bec_ofi:.2f}%", 
                       delta=f"{len(df_bec_ofi):,} estudiantes")
         else:
-            st.metric("🏛️ Becados Oficial", "N/A")
+            st.metric("Becados Oficial", "N/A")
 
     st.markdown("---")
     
@@ -720,7 +720,7 @@ elif "2. Desertores vs No Desertores" in seccion:
 # Sección 3: Modelo Predictivo
 else:
     st.header("3. Modelo Predictivo")
-    st.info("🚧 Sección en desarrollo")
+    st.info("Sección en desarrollo")
     st.markdown("""
     Esta sección contendrá:
     - Descripción del modelo
