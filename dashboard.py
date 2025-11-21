@@ -106,7 +106,7 @@ with col2:
 with col3:
     # Total becados (institucional + oficial)
     becados_institucional = (df['becado'] == 'Institucional').sum()
-    becados_oficial = (df['becado'] == 'Oficial').sum()
+    becados_oficial = (df['becado'] == 'oficial').sum()
     total_becados = becados_institucional + becados_oficial
     st.metric("💰 Total Becados", f"{total_becados:,}")
 
