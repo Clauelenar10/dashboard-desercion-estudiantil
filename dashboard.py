@@ -324,8 +324,8 @@ if "1. Características Generales" in seccion:
         # Distribución por edad
         df_edad = df[df['edad'].notna()].copy()
         df_edad['rango_edad'] = pd.cut(df_edad['edad'], 
-                                        bins=[0, 20, 25, 30, 35, 100], 
-                                        labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+                                        bins=[0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 100], 
+                                        labels=['Menos de 15', '16', '17', '18', '19', '20', '21', '22', '23', '+24'])
         edad_count = df_edad['rango_edad'].value_counts().reset_index()
         edad_count.columns = ['rango_edad', 'count']
         edad_count = edad_count.sort_values('rango_edad')
@@ -346,8 +346,8 @@ if "1. Características Generales" in seccion:
     st.markdown("##### Distribución Combinada: Género por Rango de Edad")
     df_edad_genero = df[(df['edad'].notna()) & (df['genero'].notna())].copy()
     df_edad_genero['rango_edad'] = pd.cut(df_edad_genero['edad'], 
-                                          bins=[0, 20, 25, 30, 35, 100], 
-                                          labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+                                          bins=[0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 100], 
+                                          labels=['Menos de 15', '16', '17', '18', '19', '20', '21', '22', '23', '+24'])
     edad_genero_count = df_edad_genero.groupby(['rango_edad', 'genero']).size().reset_index(name='count')
     
     fig_edad_genero = px.bar(
@@ -633,8 +633,8 @@ elif "2. Desertores vs No Desertores" in seccion:
         st.markdown("##### Tasa de Deserción por Rango de Edad")
         df_edad_des = df_sin_graduados[df_sin_graduados['edad'].notna()].copy()
         df_edad_des['rango_edad'] = pd.cut(df_edad_des['edad'], 
-                                           bins=[0, 20, 25, 30, 35, 100], 
-                                           labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+                                           bins=[0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 100], 
+                                           labels=['Menos de 15', '16', '17', '18', '19', '20', '21', '22', '23', '+24'])
         desercion_edad = df_edad_des.groupby('rango_edad').agg({
             '_id': 'count',
             'desertor': 'sum'
@@ -660,8 +660,8 @@ elif "2. Desertores vs No Desertores" in seccion:
     st.markdown("##### Deserción Combinada: Género por Rango de Edad")
     df_edad_genero_des = df_sin_graduados[(df_sin_graduados['edad'].notna()) & (df_sin_graduados['genero'].notna())].copy()
     df_edad_genero_des['rango_edad'] = pd.cut(df_edad_genero_des['edad'], 
-                                              bins=[0, 20, 25, 30, 35, 100], 
-                                              labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+                                              bins=[0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 100], 
+                                              labels=['Menos de 15', '16', '17', '18', '19', '20', '21', '22', '23', '+24'])
     desercion_edad_genero = df_edad_genero_des.groupby(['rango_edad', 'genero']).agg({
         '_id': 'count',
         'desertor': 'sum'
