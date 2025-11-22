@@ -1416,24 +1416,11 @@ else:
             col1, col2, col3 = st.columns([1, 2, 1])
             
             with col2:
-                if probabilidad >= 70:
-                    st.error(f"### RIESGO ALTO: {probabilidad}%")
-                    st.markdown("**Recomendaciones:**")
-                    st.markdown("- Intervención inmediata requerida")
-                    st.markdown("- Asignar tutor académico")
-                    st.markdown("- Evaluar apoyo financiero")
-                    st.markdown("- Seguimiento semanal")
-                elif probabilidad >= 40:
-                    st.warning(f"### RIESGO MEDIO: {probabilidad}%")
-                    st.markdown("**Recomendaciones:**")
-                    st.markdown("- Monitoreo académico regular")
-                    st.markdown("- Apoyo en materias críticas")
-                    st.markdown("- Seguimiento quincenal")
+                # Mostrar resultado como Desertor/No Desertor según puntaje redondeado
+                if round(probabilidad) == 100:
+                    st.error(f"### DESERTOR ({probabilidad:.2f}%)")
                 else:
-                    st.success(f"### RIESGO BAJO: {probabilidad}%")
-                    st.markdown("**Recomendaciones:**")
-                    st.markdown("- Continuar con el seguimiento normal")
-                    st.markdown("- Mantener rendimiento académico")
+                    st.success(f"### NO DESERTOR ({probabilidad:.2f}%)")
                 
                 # Gráfico de gauge
                 fig_gauge = go.Figure(go.Indicator(
