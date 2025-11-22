@@ -67,16 +67,12 @@ collection = db[COLLECTION_NAME]
 
 # Cargar modelo de Keras y metadatos
 if seccion == "Resumen Técnico":
-        st.title("Resumen Técnico de los Datos")
-        st.markdown("""
+    st.title("Resumen Técnico de los Datos")
+    st.markdown("""
 Este dashboard utiliza datos académicos y personales de estudiantes para analizar y predecir el riesgo de deserción universitaria. La información proviene de registros institucionales y se procesa para identificar variables relevantes como edad, género, estrato socioeconómico, desempeño académico y becas. Se aplican transformaciones para estructurar los datos y facilitar el análisis. El modelo predictivo ayuda a la toma de decisiones institucionales, permitiendo identificar estudiantes en riesgo y orientar estrategias de intervención.
-        """)
-        st.markdown("""
-        ---
-
-        _Se utiliza un modelo de machine learning para la predicción de deserción estudiantil._
-        """)
-        """)
+---
+_Se utiliza un modelo de machine learning para la predicción de deserción estudiantil._
+    """)
 @st.cache_resource
 def load_keras_model():
     """Carga el modelo de Keras guardado y sus metadatos"""
