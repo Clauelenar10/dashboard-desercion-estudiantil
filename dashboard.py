@@ -40,6 +40,8 @@ st.sidebar.markdown("---")
 
 
 # Menú de navegación para el resto de secciones
+st.markdown("<hr style='margin-top:40px;margin-bottom:10px;'>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center; color:#888; font-size:0.95em;'>Hecho por Claudia Rueda</div>", unsafe_allow_html=True)
 
 seccion = st.sidebar.radio(
     "Seleccione una sección:",
