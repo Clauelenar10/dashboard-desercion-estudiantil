@@ -847,15 +847,8 @@ else:
             
             # Predicción con modelo real
             try:
-                # Obtener todas las columnas únicas de pérdidas por departamento de la BD
-                sample_docs = list(collection.find({}, {'metricas_rendimiento.materias_perdidas_por_departamento': 1}).limit(100))
-                all_deptos = set()
-                for doc in sample_docs:
-                    perdidas = doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
-                    if isinstance(perdidas, dict):
-                        all_deptos.update(perdidas.keys())
-                
-                # Preparar datos del estudiante con TODAS las columnas en el orden correcto
+                # Crear datos del estudiante siguiendo EXACTAMENTE el mismo proceso del notebook
+                # Paso 1: Crear registro inicial con perdidas_por_depto como diccionario
                 datos_estudiante = {
                     'edad': edad,
                     'genero': genero,
@@ -877,7 +870,7 @@ else:
                     'calendario_colegio': 'A',
                     'puntaje_total': icfes_mat + icfes_lec + icfes_soc + icfes_cie + icfes_ing,
                     'matematicas': icfes_mat,
-                    'lectura': icfes_lec,
+                    'lectura_critica': icfes_lec,  # Nombre correcto del notebook
                     'sociales': icfes_soc,
                     'ciencias': icfes_cie,
                     'ingles': icfes_ing,
@@ -885,35 +878,52 @@ else:
                     'materias_cursadas': materias_cursadas,
                     'materias_perdidas': materias_perdidas,
                     'materias_repetidas': materias_repetidas,
+                    'perdidas_por_depto': {},  # Diccionario vacío como en el notebook
                     'beca': becado,
                     'ultimo_periodo': '2025-10'
                 }
                 
-                # Agregar todas las pérdidas por departamento (inicializadas en 0)
-                for depto in sorted(all_deptos):
-                    datos_estudiante[f'perdidas_{depto}'] = 0
-                
-                # Crear DataFrame
+                # Paso 2: Crear DataFrame y expandir perdidas_por_depto como en el notebook
                 df_pred = pd.DataFrame([datos_estudiante])
                 
-                # Preprocesar categóricas en el mismo orden
+                # Normalizar perdidas_por_depto y agregar prefix (igual que el notebook)
+                perdidas_df = pd.json_normalize(df_pred['perdidas_por_depto'])
+                perdidas_df = perdidas_df.add_prefix('perdidas_')
+                df_pred = pd.concat([df_pred.drop('perdidas_por_depto', axis=1), perdidas_df], axis=1)
+                
+                # Obtener columnas de pérdidas de la BD para asegurar que tengamos todas
+                sample_doc = collection.find_one({'metricas_rendimiento.materias_perdidas_por_departamento': {'$exists': True}})
+                if sample_doc:
+                    perdidas_real = sample_doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
+                    for depto in perdidas_real.keys():
+                        col_name = f'perdidas_{depto}'
+                        if col_name not in df_pred.columns:
+                            df_pred[col_name] = 0
+                
+                # Paso 3: Preprocesar categóricas (mismo orden que el notebook)
                 categoricas = ['genero', 'discapacidad', 'programa', 'programa_secundario',
                              'tipo_estudiante', 'tipo_admision', 'estado_academico',
                              'ciudad_residencia', 'depto_residencia', 'pais',
-                             'tipo_colegio', 'calendario_colegio', 'beca', 'ultimo_periodo']
+                             'tipo_colegio', 'calendario_colegio', 'ultimo_periodo']
                 
                 for col in categoricas:
                     if col in df_pred.columns:
                         le = LabelEncoder()
                         df_pred[col] = le.fit_transform(df_pred[col].astype(str))
                 
-                # Escalar datos
+                # Codificar 'beca' también (es categórica)
+                if 'beca' in df_pred.columns:
+                    le = LabelEncoder()
+                    df_pred['beca'] = le.fit_transform(df_pred['beca'].astype(str))
+                
+                # Paso 4: Escalar datos con StandardScaler
                 scaler = StandardScaler()
                 X_pred_scaled = scaler.fit_transform(df_pred.values)
                 
                 # Verificar dimensiones
                 if X_pred_scaled.shape[1] != 58:
-                    st.warning(f"⚠️ Dimensiones incorrectas: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
+                    st.warning(f"⚠️ Dimensiones: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
+                    st.write("Columnas actuales:", list(df_pred.columns))
                 
                 # Predecir con modelo
                 prediccion = modelo_keras.predict(X_pred_scaled, verbose=0)
