@@ -1162,6 +1162,13 @@ else:
         # Predictor Interactivo
         st.subheader("Predictor Interactivo")
         st.markdown("Ingrese los datos del estudiante para predecir el riesgo de deserción:")
+        
+        # Selector de modelo
+        modelo_seleccionado = st.radio(
+            "Seleccione el modelo para predicción:",
+            ["Red Neuronal", "Regresión Logística"],
+            horizontal=True
+        )
     
     # Formulario de entrada
     with st.form("prediction_form"):
@@ -1483,41 +1490,7 @@ else:
         4. **Materias repetidas**: Repetir materias aumenta significativamente el riesgo
         5. **Estrato socioeconómico**: Estratos 1-2 muestran mayor vulnerabilidad
         6. **Semestre actual**: Mayor riesgo en semestres iniciales (1-3)
-        
-        **Ejemplo de Regla:**
-        ```
-        SI promedio < 3.0 Y materias_perdidas > 3 Y estrato <= 2
-        ENTONCES riesgo = ALTO (80-90% probabilidad de deserción)
-        ```
         """)
-        
-        st.markdown("---")
-        
-        st.subheader("🎯 Ventajas y Limitaciones")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**✅ Ventajas:**")
-            st.markdown("""
-            - Fácil de interpretar y explicar
-            - Muestra reglas de decisión claras
-            - No requiere escalado de datos
-            - Identifica variables críticas
-            - Útil para políticas institucionales
-            """)
-        
-        with col2:
-            st.markdown("**⚠️ Limitaciones:**")
-            st.markdown("""
-            - Menor recall que red neuronal
-            - Puede sobreajustarse
-            - No captura relaciones complejas
-            - Sensible a pequeños cambios en datos
-            - Menor precisión general
-            """)
-        
-        st.info("💡 **Recomendación**: Use este modelo para entender *por qué* un estudiante está en riesgo, pero use la red neuronal para identificar *quiénes* están en riesgo.")
     
     # ========== TAB 3: REGRESIÓN LOGÍSTICA ==========
     with tab3:
@@ -1557,49 +1530,7 @@ else:
         5. **Colegio privado** (-0.15 a -0.25)
         """)
         
-        st.markdown("---")
-        
-        st.subheader("📈 Ejemplo de Cálculo")
-        st.markdown("""
-        **Estudiante Ejemplo:**
-        - Promedio: 2.8 → Coef: -0.50 × 2.8 = **-1.40**
-        - Materias perdidas: 5 → Coef: +0.20 × 5 = **+1.00**
-        - Estrato: 2 → Coef: **+0.40**
-        - Sin beca → Coef: **+0.30**
-        - ICFES: 210 → Coef: -0.40 × (210/100) = **-0.84**
-        
-        **Suma total**: -1.40 + 1.00 + 0.40 + 0.30 - 0.84 = **-0.54**
-        
-        Probabilidad = 1 / (1 + e^(0.54)) ≈ **37% riesgo de deserción**
-        """)
-        
-        st.markdown("---")
-        
-        st.subheader("🎯 Ventajas y Limitaciones")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**✅ Ventajas:**")
-            st.markdown("""
-            - Coeficientes fáciles de interpretar
-            - Entrenamiento rápido
-            - Estable y robusto
-            - Bueno como modelo base
-            - Útil para análisis de sensibilidad
-            """)
-        
-        with col2:
-            st.markdown("**⚠️ Limitaciones:**")
-            st.markdown("""
-            - Asume relaciones lineales
-            - No captura interacciones complejas
-            - Menor recall que red neuronal
-            - Sensible a multicolinealidad
-            - Desempeño limitado en datos complejos
-            """)
-        
-        st.info("💡 **Recomendación**: Use este modelo para cuantificar el impacto de políticas específicas (ej: ¿cuánto reduce el riesgo otorgar una beca?).")
+
     
     st.markdown("---")
     st.markdown("### 🔍 Comparación de Modelos")
