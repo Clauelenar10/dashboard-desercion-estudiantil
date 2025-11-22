@@ -44,12 +44,16 @@ st.sidebar.markdown("---")
 seccion = st.sidebar.radio(
     "Seleccione una sección:",
     [
+        "Nueva Sección",
         "1. Características Generales",
         "2. Desertores vs No Desertores",
         "3. Modelo Predictivo"
     ],
     index=0
 )
+# Mostrar la nueva sección vacía si se selecciona
+if seccion == "Nueva Sección":
+    st.title("Nueva Sección")
 
 st.sidebar.markdown("---")
 
