@@ -1151,11 +1151,11 @@ else:
         col1, col2 = st.columns(2)
         
         with col1:
-            st.metric("Recall", "76.14%", help="Detecta 3 de cada 4 estudiantes en riesgo")
+            st.metric("Recall", "75.00%", help="Detecta 3 de cada 4 estudiantes en riesgo")
         with col2:
-            st.metric("AUC", "0.809")
+            st.metric("AUC", "0.814")
         
-        st.info("**Modelo optimizado con recall ≥ 75%**: Balance entre detectar estudiantes en riesgo y mantener precisión aceptable. La mejor configuración con recall ≥ 75%.")
+        st.info("**Modelo optimizado con recall ≥ 75%**: Balance entre detectar estudiantes en riesgo (75% recall) y mantener precisión aceptable (16.84%). Configuración modelo_v2_48.")
         
         st.markdown("---")
         
