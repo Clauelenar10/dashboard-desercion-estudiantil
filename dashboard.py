@@ -1230,8 +1230,12 @@ else:
         submitted = st.form_submit_button("Predecir Riesgo de Deserción", use_container_width=True)
         
         if submitted:
+            # Forzar limpieza de cache en cada predicción
+            import hashlib
+            input_hash = hashlib.md5(f"{edad}{genero}{estrato}{programa}{semestre}{promedio}{materias_perdidas}".encode()).hexdigest()
+            
             st.markdown("---")
-            st.subheader("Resultado de la Predicción")
+            st.subheader(f"Resultado de la Predicción")
             
             # Predicción con modelo real de Keras
             if modelo_keras is None:
