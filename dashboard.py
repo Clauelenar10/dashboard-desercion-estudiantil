@@ -1452,9 +1452,6 @@ else:
                 st.write(f"- F1-Score: {info_modelo['metricas']['f1']:.4f}")
                 st.write(f"- AUC: {info_modelo['metricas']['auc']:.4f}")
                 st.write(f"- Score Custom: {info_modelo['metricas']['score_custom']:.4f}")
-                st.write("**Matriz de Confusión:**")
-                st.write(f"- TP: {info_modelo['matriz_confusion']['tp']}, FP: {info_modelo['matriz_confusion']['fp']}")
-                st.write(f"- TN: {info_modelo['matriz_confusion']['tn']}, FN: {info_modelo['matriz_confusion']['fn']}")
     else:
         st.info("**Nota:** Este modelo utiliza una red neuronal entrenada con datos históricos de deserción estudiantil.")
     
