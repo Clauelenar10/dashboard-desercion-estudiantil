@@ -847,7 +847,15 @@ else:
             
             # Predicción con modelo real
             try:
-                # Preparar datos del estudiante
+                # Obtener todas las columnas únicas de pérdidas por departamento de la BD
+                sample_docs = list(collection.find({}, {'metricas_rendimiento.materias_perdidas_por_departamento': 1}).limit(100))
+                all_deptos = set()
+                for doc in sample_docs:
+                    perdidas = doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
+                    if isinstance(perdidas, dict):
+                        all_deptos.update(perdidas.keys())
+                
+                # Preparar datos del estudiante con TODAS las columnas en el orden correcto
                 datos_estudiante = {
                     'edad': edad,
                     'genero': genero,
@@ -881,17 +889,14 @@ else:
                     'ultimo_periodo': '2025-10'
                 }
                 
-                # Agregar pérdidas por departamento (inicializadas en 0)
-                departamentos = ['Arquitectura', 'Bellas Artes', 'Ciencias Básicas', 
-                               'Ciencias de la Educación', 'Ciencias Humanas', 'Ciencias Jurídicas',
-                               'Derecho', 'Humanidades', 'Ingeniería', 'Química y Farmacia']
-                for depto in departamentos:
+                # Agregar todas las pérdidas por departamento (inicializadas en 0)
+                for depto in sorted(all_deptos):
                     datos_estudiante[f'perdidas_{depto}'] = 0
                 
                 # Crear DataFrame
                 df_pred = pd.DataFrame([datos_estudiante])
                 
-                # Preprocesar categóricas
+                # Preprocesar categóricas en el mismo orden
                 categoricas = ['genero', 'discapacidad', 'programa', 'programa_secundario',
                              'tipo_estudiante', 'tipo_admision', 'estado_academico',
                              'ciudad_residencia', 'depto_residencia', 'pais',
@@ -905,6 +910,10 @@ else:
                 # Escalar datos
                 scaler = StandardScaler()
                 X_pred_scaled = scaler.fit_transform(df_pred.values)
+                
+                # Verificar dimensiones
+                if X_pred_scaled.shape[1] != 58:
+                    st.warning(f"⚠️ Dimensiones incorrectas: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
                 
                 # Predecir con modelo
                 prediccion = modelo_keras.predict(X_pred_scaled, verbose=0)
