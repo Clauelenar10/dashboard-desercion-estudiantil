@@ -19,7 +19,12 @@ st.set_page_config(
 # ============================================================================
 # SIDEBAR - NAVEGACIÓN
 # ============================================================================
-st.sidebar.image("https://via.placeholder.com/200x80/1f77b4/ffffff?text=Estudiante", use_container_width=True)
+st.sidebar.markdown("""
+<div style="background-color: #1f77b4; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
+    <h1 style="color: white; margin: 0; font-size: 1.8em;">📊</h1>
+    <h2 style="color: white; margin: 5px 0 0 0; font-size: 1.2em;">Sistema de Análisis</h2>
+</div>
+""", unsafe_allow_html=True)
 st.sidebar.title("Dashboard Deserción")
 st.sidebar.markdown("### Periodo: 2025-10")
 st.sidebar.markdown("---")
@@ -171,7 +176,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Total Estudiantes</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{total_estudiantes:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{total_estudiantes:,}</h2>
         </div>
         """, unsafe_allow_html=True)
 
@@ -180,7 +185,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Graduados</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{int(total_graduados):,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{int(total_graduados):,}</h2>
         </div>
         """, unsafe_allow_html=True)
 
@@ -189,7 +194,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Estrato Promedio</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estrato_promedio:.2f}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{estrato_promedio:.2f}</h2>
         </div>
         """, unsafe_allow_html=True)
 
@@ -198,7 +203,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Edad Promedio</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{edad_promedio:.1f} años</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{edad_promedio:.1f} años</h2>
         </div>
         """, unsafe_allow_html=True)
 
@@ -212,26 +217,32 @@ if "1. Características Generales" in seccion:
     total_becados = becados_institucional + becados_oficial
 
     with col1:
+        pct_total_becados = (total_becados / total_estudiantes * 100)
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Total Becados</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{total_becados:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{total_becados:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_total_becados:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
 
     with col2:
+        pct_becados_inst = (becados_institucional / total_estudiantes * 100)
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{becados_institucional:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{becados_institucional:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_becados_inst:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
 
     with col3:
+        pct_becados_ofi = (becados_oficial / total_estudiantes * 100)
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{becados_oficial:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{becados_oficial:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_becados_ofi:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -246,7 +257,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Barranquilla</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_barranquilla:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{estudiantes_barranquilla:,}</h2>
             <p style="color: #666; margin: 5px 0 0 0;">{pct_barranquilla:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
@@ -257,7 +268,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Otras Ciudades</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_no_barranquilla:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{estudiantes_no_barranquilla:,}</h2>
             <p style="color: #666; margin: 5px 0 0 0;">{pct_no_barranquilla:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
@@ -268,7 +279,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Colombia</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_colombia:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{estudiantes_colombia:,}</h2>
             <p style="color: #666; margin: 5px 0 0 0;">{pct_colombia:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
@@ -279,7 +290,7 @@ if "1. Características Generales" in seccion:
         st.markdown(f"""
         <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
             <h3 style="color: #262730; margin: 0;">Extranjero</h3>
-            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_extranjero:,}</h2>
+            <h2 style="color: #4a4a4a; margin: 10px 0 0 0;">{estudiantes_extranjero:,}</h2>
             <p style="color: #666; margin: 5px 0 0 0;">{pct_extranjero:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
@@ -382,9 +393,9 @@ if "1. Características Generales" in seccion:
                 bq_total = int(barranquilla_data['total_estudiantes'].iloc[0])
                 bq_pct = barranquilla_data['porcentaje'].iloc[0]
                 st.markdown(f"""
-                <div style="background-color: #e3f2fd; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #0068c9;">
+                <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; text-align: center;">
                     <h2 style="color: #262730; margin: 0;">Barranquilla</h2>
-                    <h1 style="color: #0068c9; margin: 10px 0;">{bq_total:,}</h1>
+                    <h1 style="color: #2e7d32; margin: 10px 0;">{bq_total:,}</h1>
                     <h3 style="color: #666; margin: 0;">{bq_pct:.1f}% del Atlántico</h3>
                 </div>
                 """, unsafe_allow_html=True)
@@ -444,7 +455,7 @@ elif "2. Desertores vs No Desertores" in seccion:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown(f"""
-        <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #d32f2f;">
+        <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; text-align: center;">
             <h2 style="color: #d32f2f; margin: 0;">Tasa de Deserción</h2>
             <h1 style="color: #d32f2f; margin: 10px 0; font-size: 3em;">{tasa_desercion_general:.2f}%</h1>
             <h3 style="color: #666; margin: 0;">{df_sin_graduados['desertor'].sum():,} de {len(df_sin_graduados):,} estudiantes</h3>
