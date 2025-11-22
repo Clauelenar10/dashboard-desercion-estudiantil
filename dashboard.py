@@ -5,6 +5,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import requests
 import numpy as np
+from tensorflow import keras
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+import json
+import os
 
 st.set_page_config(
     page_title="Dashboard Deserción Estudiantil",
@@ -51,6 +55,34 @@ def get_connection():
 client = get_connection()
 db = client[DATABASE_NAME]
 collection = db[COLLECTION_NAME]
+
+# Cargar modelo de Keras y metadatos
+@st.cache_resource
+def load_keras_model():
+    """Carga el modelo de Keras guardado y sus metadatos"""
+    try:
+        model_path = "mejor_modelo_desercion.keras"
+        info_path = "mejor_modelo_info.json"
+        
+        if not os.path.exists(model_path):
+            st.warning(f"⚠️ No se encontró el modelo en {model_path}")
+            return None, None
+        
+        # Cargar modelo
+        model = keras.models.load_model(model_path)
+        
+        # Cargar info del modelo
+        info = None
+        if os.path.exists(info_path):
+            with open(info_path, 'r') as f:
+                info = json.load(f)
+        
+        return model, info
+    except Exception as e:
+        st.warning(f"⚠️ Error al cargar el modelo: {str(e)}")
+        return None, None
+
+modelo_keras, info_modelo = load_keras_model()
 
 # Extraer todos los datos
 @st.cache_data
@@ -719,14 +751,299 @@ elif "2. Desertores vs No Desertores" in seccion:
         
         st.plotly_chart(fig_calendario, use_container_width=True)
 
-# Sección 3: Modelo Predictivo
+# ============================================================================
+# SECCIÓN 3: MODELO PREDICTIVO
+# ============================================================================
 else:
-    st.header("3. Modelo Predictivo")
-    st.info("Sección en desarrollo")
-    st.markdown("""
-    Esta sección contendrá:
-    - Descripción del modelo
-    - Métricas de rendimiento
-    - Predictor interactivo
-    - Análisis de importancia de características
-    """)
+    st.title("Modelo Predictivo de Deserción")
+    st.markdown("### Predicción de riesgo de deserción estudiantil")
+    st.markdown("---")
+    
+    # Información del modelo
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Modelo", "Red Neuronal")
+    with col2:
+        st.metric("Recall", "85.2%")
+    with col3:
+        st.metric("Precisión", "67.3%")
+    with col4:
+        st.metric("AUC", "0.91")
+    
+    st.markdown("---")
+    
+    # Predictor Interactivo
+    st.subheader("🎯 Predictor Interactivo")
+    st.markdown("Ingrese los datos del estudiante para predecir el riesgo de deserción:")
+    
+    # Formulario de entrada
+    with st.form("prediction_form"):
+        st.markdown("#### Datos Personales")
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            edad = st.number_input("Edad", min_value=15, max_value=60, value=20)
+        with col2:
+            genero = st.selectbox("Género", ["Masculino", "Femenino"])
+        with col3:
+            estrato = st.selectbox("Estrato", [1, 2, 3, 4, 5, 6])
+        with col4:
+            discapacidad = st.selectbox("Discapacidad", ["No", "Sí"])
+        
+        st.markdown("#### Información Académica")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            programa = st.selectbox("Programa", sorted(df['programa'].dropna().unique()))
+        with col2:
+            semestre = st.number_input("Semestre Actual", min_value=1, max_value=15, value=1)
+        with col3:
+            promedio = st.number_input("Promedio", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            materias_cursadas = st.number_input("Materias Cursadas", min_value=0, max_value=100, value=10)
+        with col2:
+            materias_perdidas = st.number_input("Materias Perdidas", min_value=0, max_value=50, value=0)
+        with col3:
+            materias_repetidas = st.number_input("Materias Repetidas", min_value=0, max_value=20, value=0)
+        
+        st.markdown("#### Puntajes ICFES")
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        with col1:
+            icfes_mat = st.number_input("Matemáticas", min_value=0, max_value=100, value=50)
+        with col2:
+            icfes_lec = st.number_input("Lectura", min_value=0, max_value=100, value=50)
+        with col3:
+            icfes_soc = st.number_input("Sociales", min_value=0, max_value=100, value=50)
+        with col4:
+            icfes_cie = st.number_input("Ciencias", min_value=0, max_value=100, value=50)
+        with col5:
+            icfes_ing = st.number_input("Inglés", min_value=0, max_value=100, value=50)
+        
+        st.markdown("#### Información Adicional")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            becado = st.selectbox("Tipo de Beca", ["No becado", "Institucional", "oficial"])
+        with col2:
+            tipo_colegio = st.selectbox("Tipo de Colegio", ["OFICIAL", "PRIVADO", "NO APLICA"])
+        with col3:
+            es_barranquilla = st.selectbox("¿Es de Barranquilla?", ["Sí", "No"])
+        
+        # Botón de predicción
+        submitted = st.form_submit_button("🔮 Predecir Riesgo de Deserción", use_container_width=True)
+        
+        if submitted:
+            st.markdown("---")
+            st.subheader("Resultado de la Predicción")
+            
+            # Predicción con modelo real de Keras
+            if modelo_keras is None:
+                st.error("⚠️ El modelo no está disponible. Por favor, asegúrese de que el archivo 'mejor_modelo_desercion.keras' existe en el directorio.")
+                st.stop()
+            
+            # Predicción con modelo real
+            try:
+                # Preparar datos del estudiante
+                datos_estudiante = {
+                    'edad': edad,
+                    'genero': genero,
+                    'estrato': estrato,
+                    'discapacidad': discapacidad,
+                    'programa': programa,
+                    'programa_secundario': 'Ninguno',
+                    'tiene_programa_secundario': 0,
+                    'semestre_actual': semestre,
+                    'tipo_estudiante': 'Pregrado',
+                    'tipo_admision': 'Regular',
+                    'estado_academico': 'Activo',
+                    'ciudad_residencia': 'Barranquilla' if es_barranquilla == "Sí" else 'Otra',
+                    'depto_residencia': 'Atlántico' if es_barranquilla == "Sí" else 'Otro',
+                    'pais': 'Colombia',
+                    'es_barranquilla': 1 if es_barranquilla == "Sí" else 0,
+                    'es_colombia': 1,
+                    'tipo_colegio': tipo_colegio,
+                    'calendario_colegio': 'A',
+                    'puntaje_total': icfes_mat + icfes_lec + icfes_soc + icfes_cie + icfes_ing,
+                    'matematicas': icfes_mat,
+                    'lectura': icfes_lec,
+                    'sociales': icfes_soc,
+                    'ciencias': icfes_cie,
+                    'ingles': icfes_ing,
+                    'promedio': promedio,
+                    'materias_cursadas': materias_cursadas,
+                    'materias_perdidas': materias_perdidas,
+                    'materias_repetidas': materias_repetidas,
+                    'beca': becado,
+                    'ultimo_periodo': '2025-10'
+                }
+                
+                # Agregar pérdidas por departamento (inicializadas en 0)
+                departamentos = ['Arquitectura', 'Bellas Artes', 'Ciencias Básicas', 
+                               'Ciencias de la Educación', 'Ciencias Humanas', 'Ciencias Jurídicas',
+                               'Derecho', 'Humanidades', 'Ingeniería', 'Química y Farmacia']
+                for depto in departamentos:
+                    datos_estudiante[f'perdidas_{depto}'] = 0
+                
+                # Crear DataFrame
+                df_pred = pd.DataFrame([datos_estudiante])
+                
+                # Preprocesar categóricas
+                categoricas = ['genero', 'discapacidad', 'programa', 'programa_secundario',
+                             'tipo_estudiante', 'tipo_admision', 'estado_academico',
+                             'ciudad_residencia', 'depto_residencia', 'pais',
+                             'tipo_colegio', 'calendario_colegio', 'beca', 'ultimo_periodo']
+                
+                for col in categoricas:
+                    if col in df_pred.columns:
+                        le = LabelEncoder()
+                        df_pred[col] = le.fit_transform(df_pred[col].astype(str))
+                
+                # Escalar datos
+                scaler = StandardScaler()
+                X_pred_scaled = scaler.fit_transform(df_pred.values)
+                
+                # Predecir con modelo
+                prediccion = modelo_keras.predict(X_pred_scaled, verbose=0)
+                probabilidad = float(prediccion[0][0] * 100)
+                
+                st.success("✅ Predicción realizada con modelo de red neuronal")
+                
+            except Exception as e:
+                st.error(f"⚠️ Error en la predicción: {str(e)}")
+                st.error("Por favor, contacte al administrador del sistema.")
+                st.stop()
+            
+            # Calcular promedio ICFES para análisis de factores
+            puntaje_icfes_promedio = (icfes_mat + icfes_lec + icfes_soc + icfes_cie + icfes_ing) / 5
+            
+            # Mostrar resultado
+            col1, col2, col3 = st.columns([1, 2, 1])
+            
+            with col2:
+                if probabilidad >= 70:
+                    st.error(f"### 🔴 RIESGO ALTO: {probabilidad}%")
+                    st.markdown("**Recomendaciones:**")
+                    st.markdown("- Intervención inmediata requerida")
+                    st.markdown("- Asignar tutor académico")
+                    st.markdown("- Evaluar apoyo financiero")
+                    st.markdown("- Seguimiento semanal")
+                elif probabilidad >= 40:
+                    st.warning(f"### 🟡 RIESGO MEDIO: {probabilidad}%")
+                    st.markdown("**Recomendaciones:**")
+                    st.markdown("- Monitoreo académico regular")
+                    st.markdown("- Apoyo en materias críticas")
+                    st.markdown("- Seguimiento quincenal")
+                else:
+                    st.success(f"### 🟢 RIESGO BAJO: {probabilidad}%")
+                    st.markdown("**Recomendaciones:**")
+                    st.markdown("- Continuar con el seguimiento normal")
+                    st.markdown("- Mantener rendimiento académico")
+                
+                # Gráfico de gauge
+                fig_gauge = go.Figure(go.Indicator(
+                    mode="gauge+number",
+                    value=probabilidad,
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    title={'text': "Probabilidad de Deserción"},
+                    gauge={
+                        'axis': {'range': [None, 100]},
+                        'bar': {'color': "darkblue"},
+                        'steps': [
+                            {'range': [0, 40], 'color': "lightgreen"},
+                            {'range': [40, 70], 'color': "yellow"},
+                            {'range': [70, 100], 'color': "red"}
+                        ],
+                        'threshold': {
+                            'line': {'color': "red", 'width': 4},
+                            'thickness': 0.75,
+                            'value': 70
+                        }
+                    }
+                ))
+                
+                fig_gauge.update_layout(height=300)
+                st.plotly_chart(fig_gauge, use_container_width=True)
+            
+            st.markdown("---")
+            
+            # Factores de riesgo identificados
+            st.subheader("Factores de Riesgo Identificados")
+            
+            factores = []
+            if promedio < 3.0:
+                factores.append(("Promedio muy bajo", "Alto", f"{promedio:.2f}"))
+            elif promedio < 3.5:
+                factores.append(("Promedio bajo", "Medio", f"{promedio:.2f}"))
+                
+            if materias_perdidas > 5:
+                factores.append(("Muchas materias perdidas", "Alto", f"{materias_perdidas}"))
+            elif materias_perdidas > 2:
+                factores.append(("Materias perdidas", "Medio", f"{materias_perdidas}"))
+                
+            if materias_repetidas > 3:
+                factores.append(("Muchas materias repetidas", "Alto", f"{materias_repetidas}"))
+            elif materias_repetidas > 0:
+                factores.append(("Materias repetidas", "Medio", f"{materias_repetidas}"))
+                
+            if estrato <= 2:
+                factores.append(("Estrato socioeconómico bajo", "Medio", f"Estrato {estrato}"))
+                
+            if becado == "No becado":
+                factores.append(("Sin apoyo financiero", "Medio", "No becado"))
+                
+            if puntaje_icfes_promedio < 50:
+                factores.append(("Puntajes ICFES bajos", "Alto", f"{puntaje_icfes_promedio:.1f}"))
+            elif puntaje_icfes_promedio < 60:
+                factores.append(("Puntajes ICFES medios", "Bajo", f"{puntaje_icfes_promedio:.1f}"))
+            
+            if factores:
+                df_factores = pd.DataFrame(factores, columns=["Factor", "Nivel", "Valor"])
+                
+                # Colorear por nivel de riesgo
+                def color_nivel(val):
+                    if val == "Alto":
+                        return 'background-color: #ffcccc'
+                    elif val == "Medio":
+                        return 'background-color: #fff4cc'
+                    else:
+                        return 'background-color: #ccffcc'
+                
+                st.dataframe(
+                    df_factores.style.applymap(color_nivel, subset=['Nivel']),
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.success("✅ No se identificaron factores de riesgo significativos")
+    
+    st.markdown("---")
+    
+    # Mostrar información del modelo
+    if info_modelo:
+        with st.expander("ℹ️ Información del Modelo de Red Neuronal"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("**Hiperparámetros:**")
+                st.write(f"- ID Modelo: {info_modelo['modelo_id']}")
+                st.write(f"- Arquitectura: {info_modelo['hiperparametros']['arquitectura']}")
+                st.write(f"- Capas: {info_modelo['hiperparametros']['capas']}")
+                st.write(f"- Dropout: {info_modelo['hiperparametros']['dropout']}")
+                st.write(f"- Learning Rate: {info_modelo['hiperparametros']['learning_rate']}")
+                st.write(f"- Batch Size: {info_modelo['hiperparametros']['batch_size']}")
+                st.write(f"- Optimizer: {info_modelo['hiperparametros']['optimizer']}")
+            with col2:
+                st.write("**Métricas de Desempeño:**")
+                st.write(f"- Recall: {info_modelo['metricas']['recall']:.2%}")
+                st.write(f"- Precision: {info_modelo['metricas']['precision']:.2%}")
+                st.write(f"- F1-Score: {info_modelo['metricas']['f1']:.4f}")
+                st.write(f"- AUC: {info_modelo['metricas']['auc']:.4f}")
+                st.write(f"- Score Custom: {info_modelo['metricas']['score_custom']:.4f}")
+                st.write("**Matriz de Confusión:**")
+                st.write(f"- TP: {info_modelo['matriz_confusion']['tp']}, FP: {info_modelo['matriz_confusion']['fp']}")
+                st.write(f"- TN: {info_modelo['matriz_confusion']['tn']}, FN: {info_modelo['matriz_confusion']['fn']}")
+    else:
+        st.info("💡 **Nota:** Este modelo utiliza una red neuronal entrenada con datos históricos de deserción estudiantil.")

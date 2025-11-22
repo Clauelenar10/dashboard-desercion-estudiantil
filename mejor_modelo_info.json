@@ -1,0 +1,30 @@
+{
+    "modelo_id": "modelo_79",
+    "config_idx": 79,
+    "hiperparametros": {
+        "muestreo": "smote_40",
+        "pesos": "high_recall_2x",
+        "arquitectura": "light_3",
+        "capas": "[128, 64, 32]",
+        "dropout": 0.2,
+        "learning_rate": 0.002,
+        "batch_size": 64,
+        "optimizer": "adam",
+        "regularizacion": "l2_very_light",
+        "threshold": 0.5,
+        "epochs": 10
+    },
+    "metricas": {
+        "recall": 1.0,
+        "precision": 0.05508145849495733,
+        "f1": 0.10441176470588236,
+        "auc": 0.8192226857806079,
+        "score_custom": 0.851274951583678
+    },
+    "matriz_confusion": {
+        "tp": 71,
+        "fp": 1218,
+        "tn": 129,
+        "fn": 0
+    }
+}
