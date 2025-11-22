@@ -21,7 +21,7 @@ st.set_page_config(
 # ============================================================================
 st.sidebar.markdown("""
 <div style="background-color: #1f77b4; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px;">
-    <h1 style="color: white; margin: 0; font-size: 1.8em;">📊</h1>
+    <h1 style="color: white; margin: 0; font-size: 1.8em;">Dashboard</h1>
     <h2 style="color: white; margin: 5px 0 0 0; font-size: 1.2em;">Sistema de Análisis</h2>
 </div>
 """, unsafe_allow_html=True)
@@ -29,7 +29,7 @@ st.sidebar.title("Dashboard Deserción")
 st.sidebar.markdown("### Periodo: 2025-10")
 
 # Botón para refrescar datos
-if st.sidebar.button("🔄 Refrescar Datos", type="primary", use_container_width=True):
+if st.sidebar.button("Refrescar Datos", type="primary", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
@@ -73,7 +73,7 @@ def load_keras_model():
         info_path = "mejor_modelo_info.json"
         
         if not os.path.exists(model_path):
-            st.warning(f"⚠️ No se encontró el modelo en {model_path}")
+            st.warning(f"No se encontró el modelo en {model_path}")
             return None, None
         
         # Cargar modelo
@@ -87,7 +87,7 @@ def load_keras_model():
         
         return model, info
     except Exception as e:
-        st.warning(f"⚠️ Error al cargar el modelo: {str(e)}")
+        st.warning(f"Error al cargar el modelo: {str(e)}")
         return None, None
 
 modelo_keras, info_modelo = load_keras_model()
@@ -1130,7 +1130,7 @@ elif "2. Desertores vs No Desertores" in seccion:
         )
         st.plotly_chart(fig_multi, use_container_width=True)
         
-        st.info("💡 Valores cercanos a 1 indican correlación positiva fuerte, cercanos a -1 correlación negativa fuerte, y cercanos a 0 poca o ninguna correlación.")
+        st.info("Valores cercanos a 1 indican correlación positiva fuerte, cercanos a -1 correlación negativa fuerte, y cercanos a 0 poca o ninguna correlación.")
 
 # ============================================================================
 # SECCIÓN 3: MODELO PREDICTIVO
@@ -1141,7 +1141,7 @@ else:
     st.markdown("---")
     
     # Tabs para diferentes modelos
-    tab1, tab2, tab3 = st.tabs(["🧠 Red Neuronal (Principal)", "🌳 Árbol de Decisión", "📊 Regresión Logística"])
+    tab1, tab2, tab3 = st.tabs(["Red Neuronal (Principal)", "Árbol de Decisión", "Regresión Logística"])
     
     # ========== TAB 1: RED NEURONAL ==========
     with tab1:
@@ -1155,7 +1155,7 @@ else:
         with col2:
             st.metric("AUC", "0.809")
         
-        st.info("✨ **Modelo optimizado con recall ≥ 75%**: Balance entre detectar estudiantes en riesgo y mantener precisión aceptable. La mejor configuración con recall ≥ 75%.")
+        st.info("**Modelo optimizado con recall ≥ 75%**: Balance entre detectar estudiantes en riesgo y mantener precisión aceptable. La mejor configuración con recall ≥ 75%.")
         
         st.markdown("---")
         
@@ -1227,7 +1227,7 @@ else:
             es_barranquilla = st.selectbox("¿Es de Barranquilla?", ["Sí", "No"])
         
         # Botón de predicción
-        submitted = st.form_submit_button("🔮 Predecir Riesgo de Deserción", use_container_width=True)
+        submitted = st.form_submit_button("Predecir Riesgo de Deserción", use_container_width=True)
         
         if submitted:
             st.markdown("---")
@@ -1475,11 +1475,11 @@ else:
         with col2:
             st.metric("AUC", "0.673")
         
-        st.warning("⚠️ **Nota**: Este modelo ofrece alta interpretabilidad con reglas claras. Precisión similar a Red Neuronal pero menor recall.")
+        st.warning("**Nota**: Este modelo ofrece alta interpretabilidad con reglas claras. Precisión similar a Red Neuronal pero menor recall.")
         
         st.markdown("---")
         
-        st.subheader("📋 Reglas de Decisión Principales")
+        st.subheader("Reglas de Decisión Principales")
         st.markdown("""
         El árbol de decisión utiliza las siguientes variables clave para predecir deserción:
         
@@ -1505,11 +1505,11 @@ else:
         with col2:
             st.metric("AUC", "0.828")
         
-        st.warning("⚠️ **Nota**: Mejor F1 Score (29.44%) y AUC (0.828) entre todos los modelos. Excelente balance recall-precisión.")
+        st.warning("**Nota**: Mejor F1 Score (29.44%) y AUC (0.828) entre todos los modelos. Excelente balance recall-precisión.")
         
         st.markdown("---")
         
-        st.subheader("📊 Coeficientes e Interpretación")
+        st.subheader("Coeficientes e Interpretación")
         st.markdown("""
         La regresión logística asigna un **peso (coeficiente)** a cada variable:
         - **Coeficiente positivo** → Aumenta la probabilidad de deserción
@@ -1533,7 +1533,7 @@ else:
 
     
     st.markdown("---")
-    st.markdown("### 🔍 Comparación de Modelos")
+    st.markdown("### Comparación de Modelos")
     
     # Tabla comparativa
     comparacion_modelos = pd.DataFrame({
@@ -1550,5 +1550,5 @@ else:
     
     st.dataframe(comparacion_modelos, use_container_width=True, hide_index=True)
     
-    st.success("✅ **Conclusión**: La Regresión Logística ofrece el mejor balance (F1: 29.44%, AUC: 0.828). La Red Neuronal cumple requisito recall ≥75% con mejor precisión. Árbol de Decisión aporta interpretabilidad.")
+    st.success("**Conclusión**: La Regresión Logística ofrece el mejor balance (F1: 29.44%, AUC: 0.828). La Red Neuronal cumple requisito recall ≥75% con mejor precisión. Árbol de Decisión aporta interpretabilidad.")
 
