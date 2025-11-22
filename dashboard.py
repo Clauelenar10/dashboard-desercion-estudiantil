@@ -1424,30 +1424,7 @@ else:
                 else:
                     st.success("### NO DESERTOR")
                 
-                # Gráfico de gauge
-                fig_gauge = go.Figure(go.Indicator(
-                    mode="gauge+number",
-                    value=probabilidad,
-                    domain={'x': [0, 1], 'y': [0, 1]},
-                    title={'text': "Probabilidad de Deserción"},
-                    gauge={
-                        'axis': {'range': [None, 100]},
-                        'bar': {'color': "darkblue"},
-                        'steps': [
-                            {'range': [0, 40], 'color': "lightgreen"},
-                            {'range': [40, 70], 'color': "yellow"},
-                            {'range': [70, 100], 'color': "red"}
-                        ],
-                        'threshold': {
-                            'line': {'color': "red", 'width': 4},
-                            'thickness': 0.75,
-                            'value': 70
-                        }
-                    }
-                ))
-                
-                fig_gauge.update_layout(height=300)
-                st.plotly_chart(fig_gauge, use_container_width=True)
+                # No mostrar gráfico, solo resultado
             
             st.markdown("---")
             
