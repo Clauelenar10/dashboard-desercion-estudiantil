@@ -477,7 +477,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown(f"""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">No Becados</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_no_becados:.2f}%</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">{tasa_no_becados:.2f}%</h2>
                 <p style="color: #666; margin: 5px 0 0 0;">{len(df_no_becados):,} estudiantes</p>
             </div>
             """, unsafe_allow_html=True)
@@ -485,7 +485,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown("""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">No Becados</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">N/A</h2>
             </div>
             """, unsafe_allow_html=True)
 
@@ -497,7 +497,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown(f"""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_bec_inst:.2f}%</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">{tasa_bec_inst:.2f}%</h2>
                 <p style="color: #666; margin: 5px 0 0 0;">{len(df_bec_inst):,} estudiantes</p>
             </div>
             """, unsafe_allow_html=True)
@@ -505,7 +505,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown("""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">N/A</h2>
             </div>
             """, unsafe_allow_html=True)
 
@@ -517,7 +517,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown(f"""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_bec_ofi:.2f}%</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">{tasa_bec_ofi:.2f}%</h2>
                 <p style="color: #666; margin: 5px 0 0 0;">{len(df_bec_ofi):,} estudiantes</p>
             </div>
             """, unsafe_allow_html=True)
@@ -525,7 +525,7 @@ elif "2. Desertores vs No Desertores" in seccion:
             st.markdown("""
             <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
                 <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
-                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+                <h2 style="color: #ff9800; margin: 10px 0 0 0;">N/A</h2>
             </div>
             """, unsafe_allow_html=True)
 
@@ -581,32 +581,26 @@ elif "2. Desertores vs No Desertores" in seccion:
     st.markdown("---")
 
     # Comparación de estratos
-    st.subheader("Comparación de Estratos: Desertores vs No Desertores")
+    st.subheader("Distribución de Desertores por Estrato")
 
     df_desertores = df_sin_graduados[df_sin_graduados['desertor'] == 1]
     df_no_desertores = df_sin_graduados[df_sin_graduados['desertor'] == 0]
 
     estratos_desertores = df_desertores.groupby('estrato').size().reset_index(name='count')
-    estratos_desertores['tipo'] = 'Desertores'
-
-    estratos_no_desertores = df_no_desertores.groupby('estrato').size().reset_index(name='count')
-    estratos_no_desertores['tipo'] = 'No Desertores'
-
-    estratos_comparacion = pd.concat([estratos_desertores, estratos_no_desertores])
 
     fig_estratos = px.bar(
-        estratos_comparacion,
+        estratos_desertores,
         x='estrato',
         y='count',
-        color='tipo',
-        barmode='group',
-        labels={'estrato': 'Estrato', 'count': 'Número de Estudiantes'},
-        color_discrete_map={'Desertores': '#ef553b', 'No Desertores': '#00cc96'}
+        labels={'estrato': 'Estrato', 'count': 'Número de Desertores'},
+        color='count',
+        color_continuous_scale='Reds'
     )
 
     fig_estratos.update_layout(
         xaxis=dict(tickmode='linear', tick0=1, dtick=1),
-        legend=dict(title='', orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        showlegend=False,
+        coloraxis_showscale=False
     )
 
     st.plotly_chart(fig_estratos, use_container_width=True)
@@ -618,16 +612,19 @@ elif "2. Desertores vs No Desertores" in seccion:
 
     df_colombia_sin_grad = df_sin_graduados[df_sin_graduados['es_colombia'] == 1].copy()
 
+    # Normalizar nombres primero
+    df_colombia_sin_grad['departamento'] = df_colombia_sin_grad['departamento'].str.upper().str.strip()
+    df_colombia_sin_grad['departamento'] = df_colombia_sin_grad['departamento'].replace(mapeo_departamentos)
+    
+    # Unir Cundinamarca con Bogotá
+    df_colombia_sin_grad['departamento'] = df_colombia_sin_grad['departamento'].replace('CUNDINAMARCA', 'BOGOTÁ D.C.')
+
     desercion_depto = df_colombia_sin_grad.groupby('departamento').agg({
         '_id': 'count',
         'desertor': 'sum'
     }).reset_index()
     desercion_depto.columns = ['departamento', 'total', 'desertores']
     desercion_depto['tasa_desercion'] = (desercion_depto['desertores'] / desercion_depto['total'] * 100).round(2)
-
-    # Normalizar nombres
-    desercion_depto['departamento'] = desercion_depto['departamento'].str.upper().str.strip()
-    desercion_depto['departamento'] = desercion_depto['departamento'].replace(mapeo_departamentos)
 
     # Filtrar departamentos con al menos 10 estudiantes para tasa representativa
     desercion_depto_filtrado = desercion_depto[desercion_depto['total'] >= 10].copy()
@@ -828,18 +825,22 @@ elif "2. Desertores vs No Desertores" in seccion:
         desercion_colegio.columns = ['tipo_colegio', 'total', 'desertores']
         desercion_colegio['tasa_desercion'] = (desercion_colegio['desertores'] / desercion_colegio['total'] * 100).round(2)
         
+        # Asignar colores diferentes a cada tipo de colegio
+        colores_colegio = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c']
+        desercion_colegio['color'] = [colores_colegio[i % len(colores_colegio)] for i in range(len(desercion_colegio))]
+        
         fig_colegio = px.bar(
             desercion_colegio,
             x='tipo_colegio',
             y='tasa_desercion',
             text='tasa_desercion',
             labels={'tipo_colegio': 'Tipo de Colegio', 'tasa_desercion': 'Tasa de Deserción (%)'},
-            color='tasa_desercion',
-            color_continuous_scale='RdYlGn_r'
+            color='tipo_colegio',
+            color_discrete_sequence=colores_colegio
         )
         
         fig_colegio.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-        fig_colegio.update_layout(showlegend=False, coloraxis_showscale=False, height=400)
+        fig_colegio.update_layout(showlegend=False, height=400)
         
         st.plotly_chart(fig_colegio, use_container_width=True)
 
@@ -868,6 +869,146 @@ elif "2. Desertores vs No Desertores" in seccion:
         fig_calendario.update_layout(showlegend=False, coloraxis_showscale=False, height=400)
         
         st.plotly_chart(fig_calendario, use_container_width=True)
+
+    st.markdown("---")
+
+    # Análisis Multivariable
+    st.subheader("Análisis Multivariable")
+    st.markdown("Exploración de múltiples variables simultáneamente")
+
+    # Crear datos para análisis multivariable
+    df_multi = df_sin_graduados[
+        (df_sin_graduados['promedio'].notna()) & 
+        (df_sin_graduados['puntaje_total'].notna()) &
+        (df_sin_graduados['estrato'].notna())
+    ].copy()
+
+    # Selector de tipo de gráfico
+    tipo_grafico = st.selectbox(
+        "Seleccione el tipo de análisis:",
+        [
+            "Promedio vs ICFES (por Estrato y Deserción)",
+            "Promedio vs Materias Perdidas (por Género)",
+            "ICFES vs Materias Cursadas (por Tipo de Colegio)",
+            "Edad vs Promedio (por Programa)",
+            "Matriz de Correlación"
+        ]
+    )
+
+    if tipo_grafico == "Promedio vs ICFES (por Estrato y Deserción)":
+        # Gráfico de burbujas: promedio vs ICFES, tamaño por estrato, color por deserción
+        fig_multi = px.scatter(
+            df_multi.sample(min(1500, len(df_multi))),
+            x='puntaje_total',
+            y='promedio',
+            size='estrato',
+            color='desertor',
+            labels={
+                'puntaje_total': 'Puntaje Total ICFES',
+                'promedio': 'Promedio Acumulado',
+                'estrato': 'Estrato',
+                'desertor': 'Estado'
+            },
+            color_discrete_map={0: '#00cc96', 1: '#ef553b'},
+            size_max=20,
+            opacity=0.6,
+            height=600
+        )
+        fig_multi.for_each_trace(lambda t: t.update(name='No Desertor' if t.name == '0' else 'Desertor'))
+        st.plotly_chart(fig_multi, use_container_width=True)
+
+    elif tipo_grafico == "Promedio vs Materias Perdidas (por Género)":
+        df_multi_genero = df_multi[df_multi['genero'].notna()].copy()
+        fig_multi = px.scatter(
+            df_multi_genero,
+            x='materias_perdidas',
+            y='promedio',
+            color='genero',
+            facet_col='desertor',
+            labels={
+                'materias_perdidas': 'Materias Perdidas',
+                'promedio': 'Promedio Acumulado',
+                'genero': 'Género',
+                'desertor': 'Estado'
+            },
+            color_discrete_map={'Masculino': '#3498db', 'Femenino': '#e74c3c'},
+            opacity=0.6,
+            height=500
+        )
+        fig_multi.for_each_annotation(lambda a: a.update(text='No Desertor' if a.text.split('=')[1] == '0' else 'Desertor'))
+        st.plotly_chart(fig_multi, use_container_width=True)
+
+    elif tipo_grafico == "ICFES vs Materias Cursadas (por Tipo de Colegio)":
+        df_multi_colegio = df_multi[df_multi['tipo_colegio'].notna()].copy()
+        df_multi_colegio = df_multi_colegio[df_multi_colegio['materias_cursadas'] > 0]
+        fig_multi = px.scatter(
+            df_multi_colegio.sample(min(1500, len(df_multi_colegio))),
+            x='materias_cursadas',
+            y='puntaje_total',
+            color='tipo_colegio',
+            symbol='desertor',
+            labels={
+                'materias_cursadas': 'Materias Cursadas',
+                'puntaje_total': 'Puntaje ICFES',
+                'tipo_colegio': 'Tipo de Colegio',
+                'desertor': 'Estado'
+            },
+            opacity=0.6,
+            height=600
+        )
+        fig_multi.for_each_trace(lambda t: t.update(name=t.name.replace(', 0', ' - No Desertor').replace(', 1', ' - Desertor')))
+        st.plotly_chart(fig_multi, use_container_width=True)
+
+    elif tipo_grafico == "Edad vs Promedio (por Programa)":
+        # Seleccionar top 5 programas por cantidad de estudiantes
+        top_programas = df_multi['programa'].value_counts().head(5).index.tolist()
+        df_multi_prog = df_multi[df_multi['programa'].isin(top_programas)].copy()
+        
+        fig_multi = px.box(
+            df_multi_prog,
+            x='programa',
+            y='promedio',
+            color='desertor',
+            labels={
+                'programa': 'Programa',
+                'promedio': 'Promedio Acumulado',
+                'desertor': 'Estado'
+            },
+            color_discrete_map={0: '#00cc96', 1: '#ef553b'},
+            height=600
+        )
+        fig_multi.for_each_trace(lambda t: t.update(name='No Desertor' if t.name == '0' else 'Desertor'))
+        fig_multi.update_xaxes(tickangle=45)
+        st.plotly_chart(fig_multi, use_container_width=True)
+
+    else:  # Matriz de Correlación
+        # Seleccionar variables numéricas relevantes
+        variables_numericas = [
+            'edad', 'estrato', 'promedio', 'puntaje_total',
+            'materias_cursadas', 'materias_perdidas', 'materias_repetidas',
+            'icfes_matematicas', 'icfes_lectura', 'desertor'
+        ]
+        
+        df_corr = df_multi[variables_numericas].dropna()
+        matriz_corr = df_corr.corr()
+        
+        fig_multi = px.imshow(
+            matriz_corr,
+            labels=dict(x="Variable", y="Variable", color="Correlación"),
+            x=matriz_corr.columns,
+            y=matriz_corr.columns,
+            color_continuous_scale='RdBu_r',
+            aspect="auto",
+            text_auto='.2f',
+            height=700
+        )
+        fig_multi.update_layout(
+            title="Matriz de Correlación entre Variables",
+            xaxis_tickangle=45
+        )
+        st.plotly_chart(fig_multi, use_container_width=True)
+        
+        st.info("💡 Valores cercanos a 1 indican correlación positiva fuerte, cercanos a -1 correlación negativa fuerte, y cercanos a 0 poca o ninguna correlación.")
 
 # ============================================================================
 # SECCIÓN 3: MODELO PREDICTIVO
