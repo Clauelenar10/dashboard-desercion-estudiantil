@@ -1611,8 +1611,6 @@ else:
     comparacion_modelos = pd.DataFrame({
         'Modelo': ['Red Neuronal', 'Árbol de Decisión', 'Regresión Logística'],
         'Recall': ['76.14%', '60.23%', '71.59%'],
-        'Precisión': ['17.01%', '18.40%', '18.53%'],
-        'F1 Score': ['27.80%', '28.19%', '29.44%'],
         'AUC': ['0.809', '0.673', '0.828'],
         'Interpretabilidad': ['Baja', 'Alta', 'Media'],
         'Uso Recomendado': [
