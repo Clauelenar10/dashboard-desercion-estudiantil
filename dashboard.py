@@ -1278,7 +1278,7 @@ else:
                         'materias_repetidas': doc['metricas_rendimiento'].get('materias_repetidas', 0),
                         'perdidas_por_depto': doc['metricas_rendimiento'].get('materias_perdidas_por_departamento', {}),
                         'beca': doc['estado'].get('becado', ''),
-                        'ultimo_periodo': doc['periodo'].get('ultimo_periodo', '')
+                        'ultimo_periodo': doc.get('ultimo_periodo', 202510)
                     }
                     training_records.append(record)
                 
