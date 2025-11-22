@@ -437,21 +437,23 @@ elif "2. Desertores vs No Desertores" in seccion:
     # Filtrar estudiantes sin graduados
     df_sin_graduados = df[df['graduado'] == 0].copy()
 
-    # Tasa de deserción general (grande)
+    # Tasa de deserción general (grande) con cuadro gris y letras rojas
     tasa_desercion_general = (df_sin_graduados['desertor'].sum() / len(df_sin_graduados) * 100)
 
     st.markdown("### Tasa de Deserción General")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.metric(
-            label="",
-            value=f"{tasa_desercion_general:.2f}%",
-            delta=f"{df_sin_graduados['desertor'].sum():,} de {len(df_sin_graduados):,} estudiantes"
-        )
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #d32f2f;">
+            <h2 style="color: #d32f2f; margin: 0;">Tasa de Deserción</h2>
+            <h1 style="color: #d32f2f; margin: 10px 0; font-size: 3em;">{tasa_desercion_general:.2f}%</h1>
+            <h3 style="color: #666; margin: 0;">{df_sin_graduados['desertor'].sum():,} de {len(df_sin_graduados):,} estudiantes</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Deserción por becados
+    # Deserción por becados con cuadros de fondo
     st.subheader("Deserción por Tipo de Beca")
 
     col1, col2, col3 = st.columns(3)
@@ -461,30 +463,60 @@ elif "2. Desertores vs No Desertores" in seccion:
         df_no_becados = df_sin_graduados[df_sin_graduados['becado'] == 'No becado']
         if len(df_no_becados) > 0:
             tasa_no_becados = (df_no_becados['desertor'].sum() / len(df_no_becados) * 100)
-            st.metric("No Becados", f"{tasa_no_becados:.2f}%", 
-                      delta=f"{len(df_no_becados):,} estudiantes")
+            st.markdown(f"""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">No Becados</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_no_becados:.2f}%</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">{len(df_no_becados):,} estudiantes</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.metric("No Becados", "N/A")
+            st.markdown("""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">No Becados</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+            </div>
+            """, unsafe_allow_html=True)
 
     with col2:
         # Becados institucional
         df_bec_inst = df_sin_graduados[df_sin_graduados['becado'] == 'Institucional']
         if len(df_bec_inst) > 0:
             tasa_bec_inst = (df_bec_inst['desertor'].sum() / len(df_bec_inst) * 100)
-            st.metric("Becados Institucional", f"{tasa_bec_inst:.2f}%", 
-                      delta=f"{len(df_bec_inst):,} estudiantes")
+            st.markdown(f"""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_bec_inst:.2f}%</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">{len(df_bec_inst):,} estudiantes</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.metric("Becados Institucional", "N/A")
+            st.markdown("""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+            </div>
+            """, unsafe_allow_html=True)
 
     with col3:
         # Becados oficial
         df_bec_ofi = df_sin_graduados[df_sin_graduados['becado'] == 'oficial']
         if len(df_bec_ofi) > 0:
             tasa_bec_ofi = (df_bec_ofi['desertor'].sum() / len(df_bec_ofi) * 100)
-            st.metric("Becados Oficial", f"{tasa_bec_ofi:.2f}%", 
-                      delta=f"{len(df_bec_ofi):,} estudiantes")
+            st.markdown(f"""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">{tasa_bec_ofi:.2f}%</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">{len(df_bec_ofi):,} estudiantes</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.metric("Becados Oficial", "N/A")
+            st.markdown("""
+            <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
+                <h2 style="color: #0068c9; margin: 10px 0 0 0;">N/A</h2>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.markdown("---")
     
