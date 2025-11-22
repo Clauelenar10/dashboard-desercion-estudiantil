@@ -163,26 +163,46 @@ if "1. Características Generales" in seccion:
     st.markdown("### Análisis descriptivo de toda la población estudiantil")
     st.markdown("---")
 
-    # Métricas principales de población
+    # Métricas principales de población con estilo de fondo
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         total_estudiantes = len(df)
-        st.metric("Total Estudiantes", f"{total_estudiantes:,}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Total Estudiantes</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{total_estudiantes:,}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col2:
         total_graduados = df['graduado'].sum()
-        st.metric("Graduados", f"{int(total_graduados):,}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Graduados</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{int(total_graduados):,}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col3:
         estrato_promedio = df['estrato'].mean()
-        st.metric("Estrato Promedio", f"{estrato_promedio:.2f}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Estrato Promedio</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estrato_promedio:.2f}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col4:
         edad_promedio = df['edad'].mean()
-        st.metric("Edad Promedio", f"{edad_promedio:.1f} años")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Edad Promedio</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{edad_promedio:.1f} años</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Becados
+    # Becados con estilo de fondo
     st.subheader("Becados")
     col1, col2, col3 = st.columns(3)
     
@@ -192,42 +212,77 @@ if "1. Características Generales" in seccion:
     total_becados = becados_institucional + becados_oficial
 
     with col1:
-        st.metric("Total Becados", f"{total_becados:,}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Total Becados</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{total_becados:,}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col2:
-        st.metric("Becados Institucional", f"{becados_institucional:,}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Becados Institucional</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{becados_institucional:,}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col3:
-        st.metric("Becados Oficial", f"{becados_oficial:,}")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Becados Oficial</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{becados_oficial:,}</h2>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Ubicación geográfica
+    # Ubicación geográfica con estilo de fondo
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         estudiantes_barranquilla = (df['es_barranquilla'] == 1).sum()
         pct_barranquilla = (estudiantes_barranquilla / total_estudiantes * 100)
-        st.metric("Barranquilla", f"{estudiantes_barranquilla:,}", 
-                  delta=f"{pct_barranquilla:.1f}%")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Barranquilla</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_barranquilla:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_barranquilla:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col2:
         estudiantes_no_barranquilla = (df['es_barranquilla'] == 0).sum()
         pct_no_barranquilla = (estudiantes_no_barranquilla / total_estudiantes * 100)
-        st.metric("Otras Ciudades", f"{estudiantes_no_barranquilla:,}", 
-                  delta=f"{pct_no_barranquilla:.1f}%")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Otras Ciudades</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_no_barranquilla:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_no_barranquilla:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col3:
         estudiantes_colombia = (df['es_colombia'] == 1).sum()
         pct_colombia = (estudiantes_colombia / total_estudiantes * 100)
-        st.metric("Colombia", f"{estudiantes_colombia:,}", 
-                  delta=f"{pct_colombia:.1f}%")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Colombia</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_colombia:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_colombia:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col4:
         estudiantes_extranjero = (df['es_colombia'] == 0).sum()
         pct_extranjero = (estudiantes_extranjero / total_estudiantes * 100)
-        st.metric("Extranjero", f"{estudiantes_extranjero:,}", 
-                  delta=f"{pct_extranjero:.1f}%")
+        st.markdown(f"""
+        <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #262730; margin: 0;">Extranjero</h3>
+            <h2 style="color: #0068c9; margin: 10px 0 0 0;">{estudiantes_extranjero:,}</h2>
+            <p style="color: #666; margin: 5px 0 0 0;">{pct_extranjero:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -300,8 +355,8 @@ if "1. Características Generales" in seccion:
 
     st.markdown("---")
 
-    # Diagrama de barras de ciudades de Barranquilla
-    st.subheader("Estudiantes de Barranquilla por Ciudad")
+    # Distribución por ciudad del Atlántico
+    st.subheader("Estudiantes del Atlántico por Ciudad")
 
     df_atlantico = df[df['departamento'].str.upper().str.strip().str.contains('ATLANTICO|ATLÁNTICO', na=False)].copy()
 
@@ -316,35 +371,58 @@ if "1. Características Generales" in seccion:
         # Normalizar nombres de ciudades
         estudiantes_ciudad['ciudad'] = estudiantes_ciudad['ciudad'].str.title().str.strip()
         
-        # Ordenar por frecuencia
-        estudiantes_ciudad = estudiantes_ciudad.sort_values('total_estudiantes', ascending=True)
+        # Separar Barranquilla del resto
+        barranquilla_data = estudiantes_ciudad[estudiantes_ciudad['ciudad'] == 'Barranquilla']
+        otras_ciudades = estudiantes_ciudad[estudiantes_ciudad['ciudad'] != 'Barranquilla'].copy()
         
-        # Crear gráfico de barras horizontales
-        fig_ciudades = px.bar(
-            estudiantes_ciudad,
-            y='ciudad',
-            x='total_estudiantes',
-            text='porcentaje',
-            orientation='h',
-            labels={'ciudad': 'Ciudad', 'total_estudiantes': 'Frecuencia'},
-            color='total_estudiantes',
-            color_continuous_scale='Blues'
-        )
+        # Mostrar Barranquilla como métrica destacada
+        if len(barranquilla_data) > 0:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                bq_total = int(barranquilla_data['total_estudiantes'].iloc[0])
+                bq_pct = barranquilla_data['porcentaje'].iloc[0]
+                st.markdown(f"""
+                <div style="background-color: #e3f2fd; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #0068c9;">
+                    <h2 style="color: #262730; margin: 0;">Barranquilla</h2>
+                    <h1 style="color: #0068c9; margin: 10px 0;">{bq_total:,}</h1>
+                    <h3 style="color: #666; margin: 0;">{bq_pct:.1f}% del Atlántico</h3>
+                </div>
+                """, unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
         
-        fig_ciudades.update_traces(
-            texttemplate='%{text:.1f}%',
-            textposition='outside'
-        )
-        
-        fig_ciudades.update_layout(
-            height=max(400, len(estudiantes_ciudad) * 25),
-            showlegend=False,
-            xaxis_title="Número de Estudiantes",
-            yaxis_title="",
-            coloraxis_showscale=False
-        )
-        
-        st.plotly_chart(fig_ciudades, use_container_width=True)
+        # Mostrar gráfico solo para otras ciudades
+        if len(otras_ciudades) > 0:
+            st.subheader("Otras Ciudades del Atlántico")
+            
+            # Ordenar por frecuencia
+            otras_ciudades = otras_ciudades.sort_values('total_estudiantes', ascending=True)
+            
+            # Crear gráfico de barras horizontales
+            fig_ciudades = px.bar(
+                otras_ciudades,
+                y='ciudad',
+                x='total_estudiantes',
+                text='porcentaje',
+                orientation='h',
+                labels={'ciudad': 'Ciudad', 'total_estudiantes': 'Frecuencia'},
+                color='total_estudiantes',
+                color_continuous_scale='Blues'
+            )
+            
+            fig_ciudades.update_traces(
+                texttemplate='%{text:.1f}%',
+                textposition='outside'
+            )
+            
+            fig_ciudades.update_layout(
+                height=max(400, len(otras_ciudades) * 25),
+                showlegend=False,
+                xaxis_title="Número de Estudiantes",
+                yaxis_title="",
+                coloraxis_showscale=False
+            )
+            
+            st.plotly_chart(fig_ciudades, use_container_width=True)
     else:
         st.warning("No hay datos de estudiantes en Atlántico")
 
