@@ -1170,61 +1170,66 @@ else:
             horizontal=True
         )
     
+    # Inicializar timestamp para keys únicos
+    import time
+    if 'form_key' not in st.session_state:
+        st.session_state.form_key = 0
+    
     # Formulario de entrada
-    with st.form("prediction_form"):
+    with st.form(key=f"prediction_form_{st.session_state.form_key}"):
         st.markdown("#### Datos Personales")
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            edad = st.number_input("Edad", min_value=15, max_value=60, value=20)
+            edad = st.number_input("Edad", min_value=15, max_value=60, value=20, key=f"edad_{st.session_state.form_key}")
         with col2:
-            genero = st.selectbox("Género", ["Masculino", "Femenino"])
+            genero = st.selectbox("Género", ["Masculino", "Femenino"], key=f"genero_{st.session_state.form_key}")
         with col3:
-            estrato = st.selectbox("Estrato", [1, 2, 3, 4, 5, 6])
+            estrato = st.selectbox("Estrato", [1, 2, 3, 4, 5, 6], key=f"estrato_{st.session_state.form_key}")
         with col4:
-            discapacidad = st.selectbox("Discapacidad", ["No", "Sí"])
+            discapacidad = st.selectbox("Discapacidad", ["No", "Sí"], key=f"discapacidad_{st.session_state.form_key}")
         
         st.markdown("#### Información Académica")
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            programa = st.selectbox("Programa", sorted(df['programa'].dropna().unique()))
+            programa = st.selectbox("Programa", sorted(df['programa'].dropna().unique()), key=f"programa_{st.session_state.form_key}")
         with col2:
-            semestre = st.number_input("Semestre Actual", min_value=1, max_value=15, value=1)
+            semestre = st.number_input("Semestre Actual", min_value=1, max_value=15, value=1, key=f"semestre_{st.session_state.form_key}")
         with col3:
-            promedio = st.number_input("Promedio", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
+            promedio = st.number_input("Promedio", min_value=0.0, max_value=5.0, value=3.5, step=0.1, key=f"promedio_{st.session_state.form_key}")
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            materias_cursadas = st.number_input("Materias Cursadas", min_value=0, max_value=100, value=10)
+            materias_cursadas = st.number_input("Materias Cursadas", min_value=0, max_value=100, value=10, key=f"cursadas_{st.session_state.form_key}")
         with col2:
-            materias_perdidas = st.number_input("Materias Perdidas", min_value=0, max_value=50, value=0)
+            materias_perdidas = st.number_input("Materias Perdidas", min_value=0, max_value=50, value=0, key=f"perdidas_{st.session_state.form_key}")
         with col3:
-            materias_repetidas = st.number_input("Materias Repetidas", min_value=0, max_value=20, value=0)
+            materias_repetidas = st.number_input("Materias Repetidas", min_value=0, max_value=20, value=0, key=f"repetidas_{st.session_state.form_key}")
         
         st.markdown("#### Puntajes ICFES")
         col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
-            icfes_mat = st.number_input("Matemáticas", min_value=0, max_value=100, value=50)
+            icfes_mat = st.number_input("Matemáticas", min_value=0, max_value=100, value=50, key=f"mat_{st.session_state.form_key}")
         with col2:
-            icfes_lec = st.number_input("Lectura", min_value=0, max_value=100, value=50)
+            icfes_lec = st.number_input("Lectura", min_value=0, max_value=100, value=50, key=f"lec_{st.session_state.form_key}")
         with col3:
-            icfes_soc = st.number_input("Sociales", min_value=0, max_value=100, value=50)
+            icfes_soc = st.number_input("Sociales", min_value=0, max_value=100, value=50, key=f"soc_{st.session_state.form_key}")
         with col4:
-            icfes_cie = st.number_input("Ciencias", min_value=0, max_value=100, value=50)
+            icfes_cie = st.number_input("Ciencias", min_value=0, max_value=100, value=50, key=f"cie_{st.session_state.form_key}")
         with col5:
-            icfes_ing = st.number_input("Inglés", min_value=0, max_value=100, value=50)
+            icfes_ing = st.number_input("Inglés", min_value=0, max_value=100, value=50, key=f"ing_{st.session_state.form_key}")
         
         st.markdown("#### Información Adicional")
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            becado = st.selectbox("Tipo de Beca", ["No becado", "Institucional", "oficial"])
+            becado = st.selectbox("Tipo de Beca", ["No becado", "Institucional", "oficial"], key=f"beca_{st.session_state.form_key}")
         with col2:
-            tipo_colegio = st.selectbox("Tipo de Colegio", ["OFICIAL", "PRIVADO", "NO APLICA"])
+            tipo_colegio = st.selectbox("Tipo de Colegio", ["OFICIAL", "PRIVADO", "NO APLICA"], key=f"colegio_{st.session_state.form_key}")
         with col3:
-            es_barranquilla = st.selectbox("¿Es de Barranquilla?", ["Sí", "No"])
+            es_barranquilla = st.selectbox("¿Es de Barranquilla?", ["Sí", "No"], key=f"barranquilla_{st.session_state.form_key}")
         
         # Botones de acción
         col_btn1, col_btn2 = st.columns(2)
@@ -1235,6 +1240,7 @@ else:
     
     # Manejar limpiar formulario
     if limpiar:
+        st.session_state.form_key += 1
         st.rerun()
     
     # Manejar predicción
