@@ -1240,8 +1240,51 @@ else:
             
             # Predicción con modelo real
             try:
-                # Crear datos del estudiante siguiendo EXACTAMENTE el mismo proceso del notebook
-                # Paso 1: Crear registro inicial con perdidas_por_depto como diccionario
+                # PASO 1: Preparar datos de entrenamiento para scaler (usar datos históricos)
+                # Cargar todos los datos de MongoDB para entrenar scaler correctamente
+                datos_training = list(collection.find({}).limit(5000))
+                
+                # Crear DataFrame de entrenamiento
+                training_records = []
+                for doc in datos_training:
+                    record = {
+                        'edad': doc['datos_personales'].get('edad'),
+                        'genero': doc['datos_personales'].get('genero', ''),
+                        'estrato': doc['datos_personales'].get('estrato'),
+                        'discapacidad': doc['datos_personales'].get('discapacidad', ''),
+                        'programa': doc['academico'].get('programa', ''),
+                        'programa_secundario': doc['academico'].get('programa_secundario', 'Ninguno'),
+                        'tiene_programa_secundario': 1 if doc['academico'].get('programa_secundario') not in [None, 'Ninguno', ''] else 0,
+                        'semestre_actual': doc['academico'].get('semestre_actual'),
+                        'tipo_estudiante': doc['academico'].get('tipo_estudiante', ''),
+                        'tipo_admision': doc['academico'].get('tipo_admision', ''),
+                        'estado_academico': doc['academico'].get('estado_academico', ''),
+                        'ciudad_residencia': doc['location'].get('ciudad', ''),
+                        'depto_residencia': doc['location'].get('departamento', ''),
+                        'pais': doc['location'].get('pais', ''),
+                        'es_barranquilla': doc['location'].get('es_barranquilla', 0),
+                        'es_colombia': doc['location'].get('es_colombia', 0),
+                        'tipo_colegio': doc['colegio'].get('tipo_colegio'),
+                        'calendario_colegio': doc['colegio'].get('calendario_colegio'),
+                        'puntaje_total': doc['ICFES'].get('puntaje_total'),
+                        'matematicas': doc['ICFES'].get('matematicas'),
+                        'lectura_critica': doc['ICFES'].get('lectura_critica'),
+                        'sociales': doc['ICFES'].get('sociales'),
+                        'ciencias': doc['ICFES'].get('ciencias'),
+                        'ingles': doc['ICFES'].get('ingles'),
+                        'promedio': doc['metricas_rendimiento'].get('promedio_acumulado'),
+                        'materias_cursadas': doc['metricas_rendimiento'].get('materias_cursadas_total', 0),
+                        'materias_perdidas': doc['metricas_rendimiento'].get('materias_perdidas_total', 0),
+                        'materias_repetidas': doc['metricas_rendimiento'].get('materias_repetidas', 0),
+                        'perdidas_por_depto': doc['metricas_rendimiento'].get('materias_perdidas_por_departamento', {}),
+                        'beca': doc['estado'].get('becado', ''),
+                        'ultimo_periodo': doc['periodo'].get('ultimo_periodo', '')
+                    }
+                    training_records.append(record)
+                
+                df_training = pd.DataFrame(training_records)
+                
+                # PASO 2: Crear datos del estudiante a predecir
                 datos_estudiante = {
                     'edad': edad,
                     'genero': genero,
@@ -1276,47 +1319,50 @@ else:
                     'ultimo_periodo': '2025-10'
                 }
                 
-                # Paso 2: Crear DataFrame y expandir perdidas_por_depto como en el notebook
+                # PASO 3: Preparar datos de training expandiendo perdidas_por_depto
+                perdidas_df_train = pd.json_normalize(df_training['perdidas_por_depto'])
+                perdidas_df_train = perdidas_df_train.add_prefix('perdidas_')
+                df_training = pd.concat([df_training.drop('perdidas_por_depto', axis=1), perdidas_df_train], axis=1)
+                
+                # PASO 4: Preparar datos del estudiante a predecir
                 df_pred = pd.DataFrame([datos_estudiante])
+                perdidas_df_pred = pd.json_normalize(df_pred['perdidas_por_depto'])
+                perdidas_df_pred = perdidas_df_pred.add_prefix('perdidas_')
+                df_pred = pd.concat([df_pred.drop('perdidas_por_depto', axis=1), perdidas_df_pred], axis=1)
                 
-                # Normalizar perdidas_por_depto y agregar prefix (igual que el notebook)
-                perdidas_df = pd.json_normalize(df_pred['perdidas_por_depto'])
-                perdidas_df = perdidas_df.add_prefix('perdidas_')
-                df_pred = pd.concat([df_pred.drop('perdidas_por_depto', axis=1), perdidas_df], axis=1)
+                # PASO 5: Asegurar que ambos DataFrames tengan las mismas columnas
+                # Agregar columnas faltantes en df_pred
+                for col in df_training.columns:
+                    if col not in df_pred.columns:
+                        df_pred[col] = 0
                 
-                # Obtener TODOS los departamentos únicos de la BD (no solo de un documento)
-                all_deptos = set()
-                sample_docs = collection.find({'metricas_rendimiento.materias_perdidas_por_departamento': {'$exists': True}}).limit(1000)
-                for doc in sample_docs:
-                    perdidas_real = doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
-                    if isinstance(perdidas_real, dict):
-                        all_deptos.update(perdidas_real.keys())
+                # Reordenar columnas de df_pred para que coincidan con df_training
+                df_pred = df_pred[df_training.columns]
                 
-                # Agregar todas las columnas de departamentos que faltan
-                for depto in sorted(all_deptos):
-                    col_name = f'perdidas_{depto}'
-                    if col_name not in df_pred.columns:
-                        df_pred[col_name] = 0
-                
-                # Paso 3: Preprocesar categóricas (mismo orden que el notebook)
+                # PASO 6: Preprocesar categóricas usando TODOS los datos (training + pred)
                 categoricas = ['genero', 'discapacidad', 'programa', 'programa_secundario',
                              'tipo_estudiante', 'tipo_admision', 'estado_academico',
                              'ciudad_residencia', 'depto_residencia', 'pais',
-                             'tipo_colegio', 'calendario_colegio', 'ultimo_periodo']
+                             'tipo_colegio', 'calendario_colegio', 'beca', 'ultimo_periodo']
+                
+                # Combinar training y predicción temporalmente para fit de LabelEncoders
+                df_combined = pd.concat([df_training, df_pred], ignore_index=True)
+                encoders = {}
                 
                 for col in categoricas:
-                    if col in df_pred.columns:
+                    if col in df_combined.columns:
                         le = LabelEncoder()
-                        df_pred[col] = le.fit_transform(df_pred[col].astype(str))
+                        df_combined[col] = le.fit_transform(df_combined[col].astype(str))
+                        encoders[col] = le
                 
-                # Codificar 'beca' también (es categórica)
-                if 'beca' in df_pred.columns:
-                    le = LabelEncoder()
-                    df_pred['beca'] = le.fit_transform(df_pred['beca'].astype(str))
+                # Separar de nuevo
+                df_training_encoded = df_combined.iloc[:-1]
+                df_pred_encoded = df_combined.iloc[-1:]
                 
-                # Paso 4: Escalar datos con StandardScaler
+                # PASO 7: Escalar datos usando StandardScaler FIT en training, TRANSFORM en predicción
                 scaler = StandardScaler()
-                X_pred_scaled = scaler.fit_transform(df_pred.values)
+                scaler.fit(df_training_encoded.values)
+                X_pred_scaled = scaler.transform(df_pred_encoded.values)
                 
                 # Verificar dimensiones
                 if X_pred_scaled.shape[1] != 58:
