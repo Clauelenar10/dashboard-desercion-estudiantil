@@ -771,7 +771,7 @@ else:
     st.markdown("---")
     
     # Predictor Interactivo
-    st.subheader("🎯 Predictor Interactivo")
+    st.subheader("Predictor Interactivo")
     st.markdown("Ingrese los datos del estudiante para predecir el riesgo de deserción:")
     
     # Formulario de entrada
@@ -839,7 +839,7 @@ else:
             
             # Predicción con modelo real de Keras
             if modelo_keras is None:
-                st.error("⚠️ El modelo no está disponible. Por favor, asegúrese de que el archivo 'mejor_modelo_desercion.keras' existe en el directorio.")
+                st.error("El modelo no está disponible. Por favor, asegúrese de que el archivo 'mejor_modelo_desercion.keras' existe en el directorio.")
                 st.stop()
             
             # Predicción con modelo real
@@ -924,17 +924,17 @@ else:
                 
                 # Verificar dimensiones
                 if X_pred_scaled.shape[1] != 58:
-                    st.warning(f"⚠️ Dimensiones: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
+                    st.warning(f"Dimensiones: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
                     st.write("Columnas actuales:", list(df_pred.columns))
                 
                 # Predecir con modelo
                 prediccion = modelo_keras.predict(X_pred_scaled, verbose=0)
                 probabilidad = float(prediccion[0][0] * 100)
                 
-                st.success("✅ Predicción realizada con modelo de red neuronal")
+                st.success("Predicción realizada con modelo de red neuronal")
                 
             except Exception as e:
-                st.error(f"⚠️ Error en la predicción: {str(e)}")
+                st.error(f"Error en la predicción: {str(e)}")
                 st.error("Por favor, contacte al administrador del sistema.")
                 st.stop()
             
@@ -946,20 +946,20 @@ else:
             
             with col2:
                 if probabilidad >= 70:
-                    st.error(f"### 🔴 RIESGO ALTO: {probabilidad}%")
+                    st.error(f"### RIESGO ALTO: {probabilidad}%")
                     st.markdown("**Recomendaciones:**")
                     st.markdown("- Intervención inmediata requerida")
                     st.markdown("- Asignar tutor académico")
                     st.markdown("- Evaluar apoyo financiero")
                     st.markdown("- Seguimiento semanal")
                 elif probabilidad >= 40:
-                    st.warning(f"### 🟡 RIESGO MEDIO: {probabilidad}%")
+                    st.warning(f"### RIESGO MEDIO: {probabilidad}%")
                     st.markdown("**Recomendaciones:**")
                     st.markdown("- Monitoreo académico regular")
                     st.markdown("- Apoyo en materias críticas")
                     st.markdown("- Seguimiento quincenal")
                 else:
-                    st.success(f"### 🟢 RIESGO BAJO: {probabilidad}%")
+                    st.success(f"### RIESGO BAJO: {probabilidad}%")
                     st.markdown("**Recomendaciones:**")
                     st.markdown("- Continuar con el seguimiento normal")
                     st.markdown("- Mantener rendimiento académico")
@@ -1039,13 +1039,13 @@ else:
                     hide_index=True
                 )
             else:
-                st.success("✅ No se identificaron factores de riesgo significativos")
+                st.success("No se identificaron factores de riesgo significativos")
     
     st.markdown("---")
     
     # Mostrar información del modelo
     if info_modelo:
-        with st.expander("ℹ️ Información del Modelo de Red Neuronal"):
+        with st.expander("Información del Modelo de Red Neuronal"):
             col1, col2 = st.columns(2)
             with col1:
                 st.write("**Hiperparámetros:**")
@@ -1067,4 +1067,4 @@ else:
                 st.write(f"- TP: {info_modelo['matriz_confusion']['tp']}, FP: {info_modelo['matriz_confusion']['fp']}")
                 st.write(f"- TN: {info_modelo['matriz_confusion']['tn']}, FN: {info_modelo['matriz_confusion']['fn']}")
     else:
-        st.info("💡 **Nota:** Este modelo utiliza una red neuronal entrenada con datos históricos de deserción estudiantil.")
+        st.info("**Nota:** Este modelo utiliza una red neuronal entrenada con datos históricos de deserción estudiantil.")
