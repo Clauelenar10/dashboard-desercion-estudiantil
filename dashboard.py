@@ -891,14 +891,19 @@ else:
                 perdidas_df = perdidas_df.add_prefix('perdidas_')
                 df_pred = pd.concat([df_pred.drop('perdidas_por_depto', axis=1), perdidas_df], axis=1)
                 
-                # Obtener columnas de pérdidas de la BD para asegurar que tengamos todas
-                sample_doc = collection.find_one({'metricas_rendimiento.materias_perdidas_por_departamento': {'$exists': True}})
-                if sample_doc:
-                    perdidas_real = sample_doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
-                    for depto in perdidas_real.keys():
-                        col_name = f'perdidas_{depto}'
-                        if col_name not in df_pred.columns:
-                            df_pred[col_name] = 0
+                # Obtener TODOS los departamentos únicos de la BD (no solo de un documento)
+                all_deptos = set()
+                sample_docs = collection.find({'metricas_rendimiento.materias_perdidas_por_departamento': {'$exists': True}}).limit(1000)
+                for doc in sample_docs:
+                    perdidas_real = doc.get('metricas_rendimiento', {}).get('materias_perdidas_por_departamento', {})
+                    if isinstance(perdidas_real, dict):
+                        all_deptos.update(perdidas_real.keys())
+                
+                # Agregar todas las columnas de departamentos que faltan
+                for depto in sorted(all_deptos):
+                    col_name = f'perdidas_{depto}'
+                    if col_name not in df_pred.columns:
+                        df_pred[col_name] = 0
                 
                 # Paso 3: Preprocesar categóricas (mismo orden que el notebook)
                 categoricas = ['genero', 'discapacidad', 'programa', 'programa_secundario',
