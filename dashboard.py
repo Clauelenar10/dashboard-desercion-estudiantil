@@ -1226,10 +1226,19 @@ else:
         with col3:
             es_barranquilla = st.selectbox("¿Es de Barranquilla?", ["Sí", "No"])
         
-        # Botón de predicción
-        submitted = st.form_submit_button("Predecir Riesgo de Deserción", use_container_width=True)
-        
-        if submitted:
+        # Botones de acción
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            submitted = st.form_submit_button("Predecir Riesgo de Deserción", use_container_width=True, type="primary")
+        with col_btn2:
+            limpiar = st.form_submit_button("Limpiar Formulario", use_container_width=True)
+    
+    # Manejar limpiar formulario
+    if limpiar:
+        st.rerun()
+    
+    # Manejar predicción
+    if submitted:
             # Forzar limpieza de cache en cada predicción
             import hashlib
             input_hash = hashlib.md5(f"{edad}{genero}{estrato}{programa}{semestre}{promedio}{materias_perdidas}".encode()).hexdigest()
