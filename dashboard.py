@@ -1417,7 +1417,8 @@ else:
             
             with col2:
                 # Mostrar resultado como Desertor/No Desertor según puntaje redondeado
-                if round(probabilidad) == 100:
+                # Solo si el puntaje redondeado es exactamente 100 es desertor
+                if int(round(probabilidad)) == 100:
                     st.error(f"### DESERTOR ({probabilidad:.2f}%)")
                 else:
                     st.success(f"### NO DESERTOR ({probabilidad:.2f}%)")
