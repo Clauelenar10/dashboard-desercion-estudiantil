@@ -41,7 +41,8 @@ seccion = st.sidebar.radio(
     [
         "1. Características Generales",
         "2. Desertores vs No Desertores",
-        "3. Modelo Predictivo"
+        "3. Modelo Predictivo",
+        "Resumen Técnico"
     ],
     index=0
 )
@@ -65,6 +66,98 @@ db = client[DATABASE_NAME]
 collection = db[COLLECTION_NAME]
 
 # Cargar modelo de Keras y metadatos
+if seccion == "Resumen Técnico":
+        st.title("Resumen Técnico de los Datos")
+        st.markdown("""
+**Origen de los datos:**
+- Los datos están cargados desde Azure Cosmos DB (API MongoDB), en la base de datos `Estudiantes`, colección `Estudiantes_Materias`.
+- Se accede mediante la cadena de conexión segura almacenada en los secretos del dashboard.
+
+**Acceso a los datos:**
+- Se utiliza la librería `pymongo` para conectarse y extraer los documentos.
+- Ejemplo de acceso:
+```python
+from pymongo import MongoClient
+client = MongoClient(CONNECTION_STRING)
+db = client['Estudiantes']
+collection = db['Estudiantes_Materias']
+datos = list(collection.find({}))
+```
+
+**Variables principales:**
+- Datos personales: edad, género, estrato, discapacidad
+- Académico: programa, semestre_actual, tipo_estudiante, tipo_admision, estado_academico
+- Ubicación: ciudad, departamento, país, es_barranquilla, es_colombia
+- Colegio: tipo_colegio, calendario_colegio, descripcion_bachillerato
+- ICFES: puntaje_total, matematicas, lectura_critica, sociales, ciencias, ingles
+- Métricas rendimiento: promedio_acumulado, materias_cursadas_total, materias_perdidas_total, materias_repetidas
+- Estado: becado, graduado, desertor
+- Periodo: ultimo_periodo
+
+**Transformaciones realizadas:**
+- Normalización de variables categóricas con `LabelEncoder`.
+- Imputación de valores faltantes por moda o mediana según el grupo (desertor/no desertor).
+- Expansión de la variable `materias_perdidas_por_departamento` en columnas individuales.
+- Escalado de variables numéricas con `StandardScaler`.
+
+**Ejemplo de documento:**
+```json
+{
+    "_id": "...",
+    "datos_personales": {
+        "edad": 19,
+        "genero": "F",
+        "estrato": 3,
+        "discapacidad": "Ninguna"
+    },
+    "academico": {
+        "programa": "Ingeniería",
+        "semestre_actual": 2,
+        "tipo_estudiante": "Pregrado",
+        "tipo_admision": "Regular",
+        "estado_academico": "Activo"
+    },
+    "location": {
+        "ciudad": "Barranquilla",
+        "departamento": "Atlántico",
+        "pais": "Colombia",
+        "es_barranquilla": 1,
+        "es_colombia": 1
+    },
+    "colegio": {
+        "tipo_colegio": "OFICIAL",
+        "calendario_colegio": "A",
+        "descripcion_bachillerato": "Académico"
+    },
+    "ICFES": {
+        "puntaje_total": 320,
+        "matematicas": 65,
+        "lectura_critica": 60,
+        "sociales": 62,
+        "ciencias": 68,
+        "ingles": 65
+    },
+    "metricas_rendimiento": {
+        "promedio_acumulado": 3.8,
+        "materias_cursadas_total": 10,
+        "materias_perdidas_total": 1,
+        "materias_repetidas": 0,
+        "materias_perdidas_por_departamento": {"Matemáticas": 1, "Ciencias": 0}
+    },
+    "estado": {
+        "becado": "No becado",
+        "graduado": 0,
+        "desertor": 0
+    },
+    "periodo_info": {
+        "ultimo_periodo": "2025-10"
+    }
+}
+```
+
+**Cobertura temporal:**
+- Los datos corresponden a estudiantes activos en el periodo 2025-10 y hasta 3 periodos anteriores.
+        """)
 @st.cache_resource
 def load_keras_model():
     """Carga el modelo de Keras guardado y sus metadatos"""
