@@ -36,13 +36,27 @@ if st.sidebar.button("Refrescar Datos", type="primary", use_container_width=True
 st.sidebar.markdown("---")
 
 # Menú de navegación
+
+# Mostrar primero el resumen técnico
+st.title("Resumen Técnico de los Datos")
+st.markdown("""
+<div style='font-size: 0.9em;'>
+Este dashboard utiliza datos académicos y personales de estudiantes para analizar y predecir el riesgo de deserción universitaria. La información proviene de registros institucionales y se procesa para identificar variables relevantes como edad, género, estrato socioeconómico, desempeño académico y becas. Se aplican transformaciones para estructurar los datos y facilitar el análisis. El modelo predictivo ayuda a la toma de decisiones institucionales, permitiendo identificar estudiantes en riesgo y orientar estrategias de intervención.
+</div>
+<div style='color: #b22222; font-size: 0.85em; margin-top: 10px;'>
+<strong>Advertencia:</strong> Los datos fueron manipulados intencionalmente para exagerar tendencias y crear variables significativas de forma rápida. Los resultados pueden no reflejar la realidad y deben interpretarse con precaución.
+</div>
+----
+<span style='font-size: 0.9em;'>_Se utiliza un modelo de machine learning para la predicción de deserción estudiantil._</span>
+""", unsafe_allow_html=True)
+
+# Menú de navegación para el resto de secciones
 seccion = st.sidebar.radio(
     "Seleccione una sección:",
     [
         "1. Características Generales",
         "2. Desertores vs No Desertores",
-        "3. Modelo Predictivo",
-        "Resumen Técnico"
+        "3. Modelo Predictivo"
     ],
     index=0
 )
