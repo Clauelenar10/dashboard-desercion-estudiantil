@@ -27,6 +27,12 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 st.sidebar.title("Dashboard Deserción")
 st.sidebar.markdown("### Periodo: 2025-10")
+
+# Botón para refrescar datos
+if st.sidebar.button("🔄 Refrescar Datos", type="primary", use_container_width=True):
+    st.cache_data.clear()
+    st.rerun()
+
 st.sidebar.markdown("---")
 
 # Menú de navegación
@@ -87,12 +93,12 @@ def load_keras_model():
 modelo_keras, info_modelo = load_keras_model()
 
 # Extraer todos los datos
-@st.cache_data
-def load_data():
-    data = list(collection.find({}))
+@st.cache_data(ttl=60)
+def load_data(_collection):
+    data = list(_collection.find({}))
     return data
 
-datos = load_data()
+datos = load_data(collection)
 
 # Aplanar los datos para análisis completo
 registros = []
