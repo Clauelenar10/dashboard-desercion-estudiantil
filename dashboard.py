@@ -962,6 +962,8 @@ elif "2. Desertores vs No Desertores" in seccion:
         st.markdown("##### Por Calendario")
         
         df_calendario = df_sin_graduados[df_sin_graduados['calendario_colegio'].notna()].copy()
+        # Filtrar solo calendarios A y B
+        df_calendario = df_calendario[df_calendario['calendario_colegio'].isin(['A', 'B'])]
         desercion_calendario = df_calendario.groupby('calendario_colegio').agg({
             '_id': 'count',
             'desertor': 'sum'
