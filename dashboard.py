@@ -1388,11 +1388,21 @@ else:
                     st.warning(f"Dimensiones: {X_pred_scaled.shape[1]} columnas (esperadas: 58)")
                     st.write("Columnas actuales:", list(df_pred.columns))
                 
+                # DEBUG: Mostrar datos de entrada
+                with st.expander("🔍 Ver datos de entrada (debug)"):
+                    st.write("**Datos del estudiante:**")
+                    st.write(f"- Edad: {edad}, Género: {genero}, Estrato: {estrato}")
+                    st.write(f"- Programa: {programa}, Semestre: {semestre}")
+                    st.write(f"- Promedio: {promedio}, Materias perdidas: {materias_perdidas}")
+                    st.write(f"- ICFES: Mat={icfes_mat}, Lec={icfes_lec}")
+                    st.write(f"**Shape de entrada al modelo:** {X_pred_scaled.shape}")
+                    st.write(f"**Muestra de datos escalados (primeros 10):** {X_pred_scaled[0][:10]}")
+                
                 # Predecir con modelo
                 prediccion = modelo_keras.predict(X_pred_scaled, verbose=0)
                 probabilidad = float(prediccion[0][0] * 100)
                 
-                st.success("Predicción realizada con modelo de red neuronal")
+                st.success(f"Predicción realizada con modelo de red neuronal")
                 
             except Exception as e:
                 st.error(f"Error en la predicción: {str(e)}")
