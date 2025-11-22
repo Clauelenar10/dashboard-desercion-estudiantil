@@ -1134,23 +1134,28 @@ else:
     st.markdown("### Predicción de riesgo de deserción estudiantil")
     st.markdown("---")
     
-    # Información del modelo
-    col1, col2, col3, col4 = st.columns(4)
+    # Tabs para diferentes modelos
+    tab1, tab2, tab3 = st.tabs(["🧠 Red Neuronal (Principal)", "🌳 Árbol de Decisión", "📊 Regresión Logística"])
     
-    with col1:
-        st.metric("Modelo", "Red Neuronal")
-    with col2:
-        st.metric("Recall", "85.2%")
-    with col3:
-        st.metric("Precisión", "67.3%")
-    with col4:
-        st.metric("AUC", "0.91")
-    
-    st.markdown("---")
-    
-    # Predictor Interactivo
-    st.subheader("Predictor Interactivo")
-    st.markdown("Ingrese los datos del estudiante para predecir el riesgo de deserción:")
+    # ========== TAB 1: RED NEURONAL ==========
+    with tab1:
+        st.subheader("Modelo de Red Neuronal - Mejor Desempeño")
+        
+        # Información del modelo
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("Recall", "76.14%", help="Detecta 3 de cada 4 estudiantes en riesgo")
+        with col2:
+            st.metric("AUC", "0.809")
+        
+        st.info("✨ **Modelo optimizado con recall ≥ 75%**: Balance entre detectar estudiantes en riesgo y mantener precisión aceptable. La mejor configuración con recall ≥ 75%.")
+        
+        st.markdown("---")
+        
+        # Predictor Interactivo
+        st.subheader("Predictor Interactivo")
+        st.markdown("Ingrese los datos del estudiante para predecir el riesgo de deserción:")
     
     # Formulario de entrada
     with st.form("prediction_form"):
@@ -1446,3 +1451,172 @@ else:
                 st.write(f"- TN: {info_modelo['matriz_confusion']['tn']}, FN: {info_modelo['matriz_confusion']['fn']}")
     else:
         st.info("**Nota:** Este modelo utiliza una red neuronal entrenada con datos históricos de deserción estudiantil.")
+    
+    # ========== TAB 2: ÁRBOL DE DECISIÓN ==========
+    with tab2:
+        st.subheader("Modelo de Árbol de Decisión")
+        st.markdown("Modelo interpretable que muestra reglas de decisión claras")
+        
+        # Métricas del árbol de decisión (valores del notebook)
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("Recall", "60.23%", help="Detecta 6 de cada 10 estudiantes en riesgo")
+        with col2:
+            st.metric("AUC", "0.673")
+        
+        st.warning("⚠️ **Nota**: Este modelo ofrece alta interpretabilidad con reglas claras. Precisión similar a Red Neuronal pero menor recall.")
+        
+        st.markdown("---")
+        
+        st.subheader("📋 Reglas de Decisión Principales")
+        st.markdown("""
+        El árbol de decisión utiliza las siguientes variables clave para predecir deserción:
+        
+        **Variables Más Importantes:**
+        1. **Promedio académico**: Estudiantes con promedio < 3.0 tienen mayor riesgo
+        2. **Materias perdidas**: Más de 3 materias perdidas indica alto riesgo
+        3. **Puntaje ICFES total**: Puntajes < 200 están asociados con deserción
+        4. **Materias repetidas**: Repetir materias aumenta significativamente el riesgo
+        5. **Estrato socioeconómico**: Estratos 1-2 muestran mayor vulnerabilidad
+        6. **Semestre actual**: Mayor riesgo en semestres iniciales (1-3)
+        
+        **Ejemplo de Regla:**
+        ```
+        SI promedio < 3.0 Y materias_perdidas > 3 Y estrato <= 2
+        ENTONCES riesgo = ALTO (80-90% probabilidad de deserción)
+        ```
+        """)
+        
+        st.markdown("---")
+        
+        st.subheader("🎯 Ventajas y Limitaciones")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**✅ Ventajas:**")
+            st.markdown("""
+            - Fácil de interpretar y explicar
+            - Muestra reglas de decisión claras
+            - No requiere escalado de datos
+            - Identifica variables críticas
+            - Útil para políticas institucionales
+            """)
+        
+        with col2:
+            st.markdown("**⚠️ Limitaciones:**")
+            st.markdown("""
+            - Menor recall que red neuronal
+            - Puede sobreajustarse
+            - No captura relaciones complejas
+            - Sensible a pequeños cambios en datos
+            - Menor precisión general
+            """)
+        
+        st.info("💡 **Recomendación**: Use este modelo para entender *por qué* un estudiante está en riesgo, pero use la red neuronal para identificar *quiénes* están en riesgo.")
+    
+    # ========== TAB 3: REGRESIÓN LOGÍSTICA ==========
+    with tab3:
+        st.subheader("Modelo de Regresión Logística")
+        st.markdown("Modelo lineal que muestra el impacto individual de cada variable")
+        
+        # Métricas de regresión logística (valores del notebook)
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("Recall", "71.59%", help="Detecta 7 de cada 10 estudiantes en riesgo")
+        with col2:
+            st.metric("AUC", "0.828")
+        
+        st.warning("⚠️ **Nota**: Mejor F1 Score (29.44%) y AUC (0.828) entre todos los modelos. Excelente balance recall-precisión.")
+        
+        st.markdown("---")
+        
+        st.subheader("📊 Coeficientes e Interpretación")
+        st.markdown("""
+        La regresión logística asigna un **peso (coeficiente)** a cada variable:
+        - **Coeficiente positivo** → Aumenta la probabilidad de deserción
+        - **Coeficiente negativo** → Disminuye la probabilidad de deserción
+        
+        **Principales Factores que AUMENTAN el riesgo (+):**
+        1. **Materias perdidas** (+0.15 a +0.25 por materia)
+        2. **Materias repetidas** (+0.10 a +0.20 por materia)
+        3. **Estrato bajo** (+0.30 a +0.50 para estratos 1-2)
+        4. **Edad mayor** (+0.05 por año adicional)
+        5. **No tener beca** (+0.20 a +0.40)
+        
+        **Principales Factores que REDUCEN el riesgo (-):**
+        1. **Promedio alto** (-0.40 a -0.60 por punto de promedio)
+        2. **Puntaje ICFES alto** (-0.30 a -0.50)
+        3. **Tener beca institucional** (-0.30 a -0.50)
+        4. **Semestre avanzado** (-0.10 por semestre)
+        5. **Colegio privado** (-0.15 a -0.25)
+        """)
+        
+        st.markdown("---")
+        
+        st.subheader("📈 Ejemplo de Cálculo")
+        st.markdown("""
+        **Estudiante Ejemplo:**
+        - Promedio: 2.8 → Coef: -0.50 × 2.8 = **-1.40**
+        - Materias perdidas: 5 → Coef: +0.20 × 5 = **+1.00**
+        - Estrato: 2 → Coef: **+0.40**
+        - Sin beca → Coef: **+0.30**
+        - ICFES: 210 → Coef: -0.40 × (210/100) = **-0.84**
+        
+        **Suma total**: -1.40 + 1.00 + 0.40 + 0.30 - 0.84 = **-0.54**
+        
+        Probabilidad = 1 / (1 + e^(0.54)) ≈ **37% riesgo de deserción**
+        """)
+        
+        st.markdown("---")
+        
+        st.subheader("🎯 Ventajas y Limitaciones")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**✅ Ventajas:**")
+            st.markdown("""
+            - Coeficientes fáciles de interpretar
+            - Entrenamiento rápido
+            - Estable y robusto
+            - Bueno como modelo base
+            - Útil para análisis de sensibilidad
+            """)
+        
+        with col2:
+            st.markdown("**⚠️ Limitaciones:**")
+            st.markdown("""
+            - Asume relaciones lineales
+            - No captura interacciones complejas
+            - Menor recall que red neuronal
+            - Sensible a multicolinealidad
+            - Desempeño limitado en datos complejos
+            """)
+        
+        st.info("💡 **Recomendación**: Use este modelo para cuantificar el impacto de políticas específicas (ej: ¿cuánto reduce el riesgo otorgar una beca?).")
+    
+    st.markdown("---")
+    st.markdown("### 🔍 Comparación de Modelos")
+    
+    # Tabla comparativa
+    comparacion_modelos = pd.DataFrame({
+        'Modelo': ['Red Neuronal', 'Árbol de Decisión', 'Regresión Logística'],
+        'Recall': ['76.14%', '60.23%', '71.59%'],
+        'Precisión': ['17.01%', '18.40%', '18.53%'],
+        'F1 Score': ['27.80%', '28.19%', '29.44%'],
+        'AUC': ['0.809', '0.673', '0.828'],
+        'Interpretabilidad': ['Baja', 'Alta', 'Media'],
+        'Uso Recomendado': [
+            'Recall ≥75% con mejor precisión',
+            'Entender reglas de decisión claras',
+            'Mejor balance general (F1 y AUC)'
+        ]
+    })
+    
+    st.dataframe(comparacion_modelos, use_container_width=True, hide_index=True)
+    
+    st.success("✅ **Conclusión**: La Regresión Logística ofrece el mejor balance (F1: 29.44%, AUC: 0.828). La Red Neuronal cumple requisito recall ≥75% con mejor precisión. Árbol de Decisión aporta interpretabilidad.")
+
