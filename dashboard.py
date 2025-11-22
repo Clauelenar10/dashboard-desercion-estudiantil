@@ -297,6 +297,76 @@ if "1. Características Generales" in seccion:
 
     st.markdown("---")
 
+    # Distribución por Género y Edad
+    st.subheader("Distribución por Género y Edad")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Distribución por género
+        genero_count = df['genero'].value_counts().reset_index()
+        genero_count.columns = ['genero', 'count']
+        genero_count['porcentaje'] = (genero_count['count'] / genero_count['count'].sum() * 100).round(1)
+        
+        fig_genero = px.pie(
+            genero_count,
+            values='count',
+            names='genero',
+            title='Distribución por Género',
+            color_discrete_sequence=['#3498db', '#e74c3c'],
+            hole=0.4
+        )
+        fig_genero.update_traces(textposition='inside', textinfo='percent+label')
+        fig_genero.update_layout(height=400)
+        st.plotly_chart(fig_genero, use_container_width=True)
+
+    with col2:
+        # Distribución por edad
+        df_edad = df[df['edad'].notna()].copy()
+        df_edad['rango_edad'] = pd.cut(df_edad['edad'], 
+                                        bins=[0, 20, 25, 30, 35, 100], 
+                                        labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+        edad_count = df_edad['rango_edad'].value_counts().reset_index()
+        edad_count.columns = ['rango_edad', 'count']
+        edad_count = edad_count.sort_values('rango_edad')
+        
+        fig_edad = px.bar(
+            edad_count,
+            x='rango_edad',
+            y='count',
+            title='Distribución por Rango de Edad',
+            labels={'rango_edad': 'Rango de Edad', 'count': 'Número de Estudiantes'},
+            color='count',
+            color_continuous_scale='Blues'
+        )
+        fig_edad.update_layout(showlegend=False, coloraxis_showscale=False, height=400)
+        st.plotly_chart(fig_edad, use_container_width=True)
+
+    # Gráfico combinado: Género y Edad
+    st.markdown("##### Distribución Combinada: Género por Rango de Edad")
+    df_edad_genero = df[(df['edad'].notna()) & (df['genero'].notna())].copy()
+    df_edad_genero['rango_edad'] = pd.cut(df_edad_genero['edad'], 
+                                          bins=[0, 20, 25, 30, 35, 100], 
+                                          labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+    edad_genero_count = df_edad_genero.groupby(['rango_edad', 'genero']).size().reset_index(name='count')
+    
+    fig_edad_genero = px.bar(
+        edad_genero_count,
+        x='rango_edad',
+        y='count',
+        color='genero',
+        barmode='group',
+        labels={'rango_edad': 'Rango de Edad', 'count': 'Número de Estudiantes', 'genero': 'Género'},
+        color_discrete_map={'Masculino': '#3498db', 'Femenino': '#e74c3c'}
+    )
+    fig_edad_genero.update_layout(
+        height=450,
+        legend=dict(title='', orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_edad_genero, use_container_width=True)
+
+    st.markdown("---")
+
     # ============================================================================
     # SECCIÓN 2: DISTRIBUCIÓN GEOGRÁFICA
     # ============================================================================
@@ -530,6 +600,93 @@ elif "2. Desertores vs No Desertores" in seccion:
             """, unsafe_allow_html=True)
 
     st.markdown("---")
+
+    # Deserción por Género y Edad
+    st.subheader("Deserción por Género y Edad")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("##### Tasa de Deserción por Género")
+        df_genero = df_sin_graduados[df_sin_graduados['genero'].notna()].copy()
+        desercion_genero = df_genero.groupby('genero').agg({
+            '_id': 'count',
+            'desertor': 'sum'
+        }).reset_index()
+        desercion_genero.columns = ['genero', 'total', 'desertores']
+        desercion_genero['tasa_desercion'] = (desercion_genero['desertores'] / desercion_genero['total'] * 100).round(2)
+        
+        fig_genero_des = px.bar(
+            desercion_genero,
+            x='genero',
+            y='tasa_desercion',
+            text='tasa_desercion',
+            labels={'genero': 'Género', 'tasa_desercion': 'Tasa de Deserción (%)'},
+            color='genero',
+            color_discrete_map={'Masculino': '#3498db', 'Femenino': '#e74c3c'}
+        )
+        fig_genero_des.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+        fig_genero_des.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_genero_des, use_container_width=True)
+
+    with col2:
+        st.markdown("##### Tasa de Deserción por Rango de Edad")
+        df_edad_des = df_sin_graduados[df_sin_graduados['edad'].notna()].copy()
+        df_edad_des['rango_edad'] = pd.cut(df_edad_des['edad'], 
+                                           bins=[0, 20, 25, 30, 35, 100], 
+                                           labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+        desercion_edad = df_edad_des.groupby('rango_edad').agg({
+            '_id': 'count',
+            'desertor': 'sum'
+        }).reset_index()
+        desercion_edad.columns = ['rango_edad', 'total', 'desertores']
+        desercion_edad['tasa_desercion'] = (desercion_edad['desertores'] / desercion_edad['total'] * 100).round(2)
+        desercion_edad = desercion_edad.sort_values('rango_edad')
+        
+        fig_edad_des = px.bar(
+            desercion_edad,
+            x='rango_edad',
+            y='tasa_desercion',
+            text='tasa_desercion',
+            labels={'rango_edad': 'Rango de Edad', 'tasa_desercion': 'Tasa de Deserción (%)'},
+            color='tasa_desercion',
+            color_continuous_scale='Reds'
+        )
+        fig_edad_des.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+        fig_edad_des.update_layout(showlegend=False, coloraxis_showscale=False, height=400)
+        st.plotly_chart(fig_edad_des, use_container_width=True)
+
+    # Gráfico combinado
+    st.markdown("##### Deserción Combinada: Género por Rango de Edad")
+    df_edad_genero_des = df_sin_graduados[(df_sin_graduados['edad'].notna()) & (df_sin_graduados['genero'].notna())].copy()
+    df_edad_genero_des['rango_edad'] = pd.cut(df_edad_genero_des['edad'], 
+                                              bins=[0, 20, 25, 30, 35, 100], 
+                                              labels=['Menos de 20', '20-24', '25-29', '30-34', '35+'])
+    desercion_edad_genero = df_edad_genero_des.groupby(['rango_edad', 'genero']).agg({
+        '_id': 'count',
+        'desertor': 'sum'
+    }).reset_index()
+    desercion_edad_genero.columns = ['rango_edad', 'genero', 'total', 'desertores']
+    desercion_edad_genero['tasa_desercion'] = (desercion_edad_genero['desertores'] / desercion_edad_genero['total'] * 100).round(2)
+    
+    fig_edad_genero_des = px.bar(
+        desercion_edad_genero,
+        x='rango_edad',
+        y='tasa_desercion',
+        color='genero',
+        barmode='group',
+        text='tasa_desercion',
+        labels={'rango_edad': 'Rango de Edad', 'tasa_desercion': 'Tasa de Deserción (%)', 'genero': 'Género'},
+        color_discrete_map={'Masculino': '#3498db', 'Femenino': '#e74c3c'}
+    )
+    fig_edad_genero_des.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    fig_edad_genero_des.update_layout(
+        height=450,
+        legend=dict(title='', orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_edad_genero_des, use_container_width=True)
+    
+    st.markdown("---")
     
     # Deserción por programas
     st.subheader("Deserción por Programa")
@@ -682,49 +839,6 @@ elif "2. Desertores vs No Desertores" in seccion:
     with col2:
         promedio_desertor = df_desertores['promedio'].mean()
         st.metric("Promedio Desertores", f"{promedio_desertor:.2f}")
-
-    st.markdown("---")
-    
-    # Gráfico de dispersión: Promedio vs ICFES
-    st.subheader("Relación: Promedio Acumulado vs Puntaje ICFES")
-
-    # Filtrar valores válidos
-    df_scatter = df_sin_graduados[
-        (df_sin_graduados['promedio'].notna()) & 
-        (df_sin_graduados['puntaje_total'].notna())
-    ].copy()
-
-    fig_scatter = px.scatter(
-        df_scatter.sample(min(2000, len(df_scatter))),  # Muestra para performance
-        x='puntaje_total',
-        y='promedio',
-        color='desertor',
-        labels={
-            'puntaje_total': 'Puntaje Total ICFES',
-            'promedio': 'Promedio Acumulado',
-            'desertor': 'Estado'
-        },
-        color_discrete_map={0: '#00cc96', 1: '#ef553b'},
-        opacity=0.6
-    )
-
-    fig_scatter.update_layout(
-        height=500,
-        legend=dict(
-            title='',
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            itemsizing='constant'
-        )
-    )
-
-    # Cambiar etiquetas de la leyenda
-    fig_scatter.for_each_trace(lambda t: t.update(name='No Desertor' if t.name == '0' else 'Desertor'))
-
-    st.plotly_chart(fig_scatter, use_container_width=True)
 
     st.markdown("---")
 
