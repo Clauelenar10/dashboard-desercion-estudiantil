@@ -36,9 +36,6 @@ seccion = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.info(
-    "💡 **Navegación:** Utilice el menú superior para explorar diferentes análisis de la población estudiantil."
-)
 
 CONNECTION_STRING = st.secrets["CONNECTION_STRING"]
 
